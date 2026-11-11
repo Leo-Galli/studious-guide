@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Funzione principale
+SALVARE() {
+    # 1. Chiede conferma con un testo "glitterato" usando charmbracelet/gum
+    gum style \
+        --foreground 212 \
+        --border double \
+        --border-foreground 212 \
+        --margin 1 \
+        --padding 1 \
+        --bold \
+        "✨ say YES ✨"
+    
+    # Raccoglie l'input dell'utente
+    local USER_INPUT
+    USER_INPUT=$(gum input --placeholder "✨...")
+
+    # Converte l'input in minuscolo per facilitare il controllo (Bash 4+)
+    local input_lower="${USER_INPUT,,}"
+
+    # 2. Controllo dell'input (inizia con 'y' seguito eventualmente da 'e' o 's')
+    # Matcherà "yes", "ye", "yse", "ys", "y", ecc.
+    if [[ "$input_lower" =~ ^y[es]*$ ]]; then
+        gum style --foreground 46 "Procedo con git..."
+        
+        gum style --foreground 226 "Stage dei file .html..."
+        # 3. Aggiunge SOLO i file .html ovunque si trovino
+        find . -type f -name "*.html" -exec git add {} +
+
+        if [ -z "$(git diff --cached --name-only -- '*.html')" ]; then
+            gum style --foreground 214 --bold "🐒 🐒 🐒 Non risultano file .html da SALVARE 🐒 🐒 🐒"
+            
+            # 9. Mostro stato working directory
+            gum style --foreground 226 "🛠️🛠️🛠️   Guardate te... ​💡​💡​💡"
+            git status
+            return 0
+        fi
+        
+        gum style --foreground 226 "Commit..."
+        # 4. Committa usando esattamente la stringa digitata dall'utente
+        git commit -m "struggling(typing): ${USER_INPUT}"
+        
+        # 5. Fetch da upstream
+        gum style --foreground 226 "Eseguo fetch da upstream..."
+        git fetch upstream
+        
+        # 6. Rebase da upstream/main
+        gum style --foreground 226 "Eseguo rebase su upstream/main..."
+        git rebase upstream/main
+        
+        # Sicurezza: blocca l'esecuzione se il rebase fallisce
+        if [ $? -ne 0 ]; then
+            gum style --foreground 196 --bold "❌ Rebase fallito! Chiama il prof."
+            return 1
+        fi
+        
+        # 7. Push forzato (aggiornerà la PR automaticamente se già esiste)
+        gum style --foreground 226 "Eseguo push forzato..."
+        git push -f
+
+        # --- MODIFICATO: CONTROLLO TRAMITE FILE LOCALE ---
+        if [ ! -f .GH_REPO_SET-DEFAULT ]; then
+            gum style --foreground 212 "File .GH_REPO_SET-DEFAULT non trovato. Configuro il repository..."
+            
+            # Estrae l'URL da .git/config (priorità a upstream, poi origin)
+            local REMOTE_URL
+            REMOTE_URL=$(git remote get-url upstream 2>/dev/null || git remote get-url origin 2>/dev/null)
+            
+            local REPO_IDENTIFIER=""
+            if [ -n "$REMOTE_URL" ]; then
+                # Pulisce l'URL trasformando sia HTTPS che SSH nel formato "owner/repo"
+                REPO_IDENTIFIER=$(echo "$REMOTE_URL" | sed -E 's/.*github.com[:\/]//; s/\.git$//')
+            elif [ -n "$GITHUB_REPOSITORY" ]; then
+                # Fallback sulla variabile d'ambiente di Codespaces
+                REPO_IDENTIFIER="$GITHUB_REPOSITORY"
+            fi
+            
+            # Se ha trovato un identificatore valido, imposta il default e crea il file
+            if [ -n "$REPO_IDENTIFIER" ]; then
+                if gh repo set-default "$REPO_IDENTIFIER"; then
+                    touch .GH_REPO_SET-DEFAULT
+                    gum style --foreground 46 "Repository impostato su: $REPO_IDENTIFIER e creato file di sblocco."
+                fi
+            fi
+        fi
+        # --------------------------------------------------------
+        
+        # 8. Apre/Aggiorna la PR verso upstream tramite GitHub CLI
+        # Se la PR esiste già, il `push -f` l'ha già aggiornata. Ignoriamo l'errore di `gh pr create`.
+        gum style --foreground 226 "Gestione Pull Request..."
+        set -e
+        gh pr create --fill --base main
+        
+        gum style --foreground 46 --bold "✅ Tutto completato con successo!"
+    else
+        gum style --foreground 196 --bold "🧠🧠🧠 Non sai usare la tastiera, hai inserito '${USER_INPUT}'. Ritenta a SALVARE 🛠️🛠️🛠️"
+    fi
+}
+
+# Esporta la funzione se lo script viene "sourciato", 
+# altrimenti la esegue direttamente.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    SALVARE
+else
+    export -f SALVARE
+fi

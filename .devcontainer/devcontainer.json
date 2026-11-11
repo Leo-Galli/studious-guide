@@ -1,5 +1,13 @@
 {
 	"name": "Node.js Sample",
+	"features": {
+		"ghcr.io/devcontainers/features/java:1": {
+			// https://github.com/devcontainers/features/tree/main/src/java
+			// https://sdkman.io/jdks/tem/
+			"version": "17.0.19",
+			"jdkDistro": "tem"
+		}
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -8,5 +16,29 @@
 			]
 		}
 	},
-	"postCreateCommand": ".devcontainer/post-create-command.sh"
+	"postCreateCommand": ".devcontainer/post-create-command.sh",
+	"forwardPorts": [
+		5500,
+		3000,
+		5731
+	],
+	// Configure port-specific properties.
+	"portsAttributes": {
+		"5500": {
+			"label": "Go Live",
+			"onAutoForward": "notify",
+			"visibility": "public"
+		},
+		"3000": {
+			"label": "Node.js WebSocket Server",
+			"onAutoForward": "notify",
+			"visibility": "public"
+		},
+		"5173": {
+			"label": "Vite",
+			"onAutoForward": "notify",
+			"protocol": "https",
+			"visibility": "public"
+		}
+	}
 }

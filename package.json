@@ -2,13 +2,15 @@
   "name": "studious-guide",
   "private": true,
   "devDependencies": {
-    "three": "0.161.0",
-    "jquery": "4.0.0"
+    "jquery": "4.0.0",
+    "three": "0.161.0"
   },
   "scripts": {
     "vendor": "bash vendor.sh",
-    "build": "npm run vendor"
+    "build": "npm run vendor",
+    "wss:server": "node nodejs/wss.js"
   },
   "dependencies": {
+    "ws": "8.21.0"
   }
 }

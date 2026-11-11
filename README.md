@@ -1,4 +1,11 @@
+# TERMINALE > SALVARE
+
+![SALVARE](docs/assets/SALVARE.png)
+
 ## Introduzione
+
+![Metaverso a scuola](docs/assets/metaverso-a-scuola.black.square.192x192.png)
+
 Questo repository contiene applicazioni WebXR basate su three.js compatibili con il VR headset Meta Quest.
 
 Il progetto è portato avanti dall'IIS G.L. Lagrange per sopperrire alla mancanza di contenuti educativi per visori.
@@ -39,10 +46,8 @@ Demo three.js a tema matematico/trigonometrico.
 - https://threejs.org/examples/webgl_math_obb.html
 
 ## TODO
-1. login google che chiede permessi drive/classroom
-2. pulsante in ogni pagina VR che permette di fare screenshoot e condividerlo su classroom/drive
-3. capire se si può sfruttare la cloche/joystick per muoversi nello spazio invece che cliccare le frecce di movimento
-4. analytics senza necessità di cookie banner e con dati in eu o self hosted https://github.com/plausible/community-edition/
+1. analytics senza necessità di cookie banner e con dati in eu o self hosted https://github.com/plausible/community-edition/
+2. collegare node red all'ambiente virtuale così da poter creare dashboard e registrare presenze
 
 ## Carraro XR Edu Lab
 
@@ -55,3 +60,11 @@ Virtual Hospitality: https://education.carraro-lab.com/catalogo-dei-laboratori-d
 Catalogo Istituti Tecnici: https://education.carraro-lab.com/catalogo-dei-laboratori-didattici-istituti-tecnici/
 
 XR Edu Lab: https://www.xredulab.com
+
+## WSS on Render.com
+
+On docs/demo/classroom.html we use Render HTTPS/WSS when public on aab016.github.io
+
+https://dashboard.render.com/web/srv-d8hi2mk8aovs73f83sa0/events
+
+We need OCULUS_GRAPH_ACCESS_TOKEN OC|<app id>|<app secret>

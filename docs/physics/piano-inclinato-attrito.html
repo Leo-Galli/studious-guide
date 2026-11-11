@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piano inclinato e attrito</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three":         "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/",
+      "cannon-es":     "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <canvas id="sim-canvas"></canvas>
+
+  <!-- UI overlay -->
+  <div id="ui">
+
+    <!-- AMBIENTE -->
+    <button class="menu-btn env" onclick="togglePanel('env', this)">
+      🌍 Ambiente
+      <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M3 5l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="panel" id="panel-env">
+      <div class="prop-group">
+        <div class="prop-label">Gravità</div>
+        <div class="prop-row">
+          <input type="range" id="g-slider" min="1" max="25" value="9.81" step="0.01" oninput="onGravSlider()">
+          <input type="number" id="g-num" value="9.81" min="1" max="25" step="0.01" onchange="onGravNumber()">
+          <span class="prop-unit">m/s²</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIANO -->
+    <button class="menu-btn plane" onclick="togglePanel('plane', this)">
+      📐 Piano inclinato
+      <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M3 5l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="panel" id="panel-plane">
+      <div class="prop-group">
+        <div class="prop-label">Angolo (θ)</div>
+        <div class="prop-row">
+          <input type="range" id="angle-slider" min="0" max="75" value="30" step="1" oninput="onAngleSlider()">
+          <input type="number" id="angle-num" value="30" min="0" max="75" step="1" onchange="onAngleNumber()">
+          <span class="prop-unit">°</span>
+        </div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Coeff. attrito (μ)</div>
+        <div class="prop-row">
+          <input type="range" id="mu-slider" min="0" max="1" value="0.30" step="0.01" oninput="onMuSlider()">
+          <input type="number" id="mu-num" value="0.30" min="0" max="1" step="0.01" onchange="onMuNumber()">
+        </div>
+      </div>
+    </div>
+
+    <!-- OGGETTO -->
+    <button class="menu-btn obj" onclick="togglePanel('obj', this)">
+      📦 Oggetto
+      <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M3 5l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="panel" id="panel-obj">
+      <div class="prop-group">
+        <div class="prop-label">Massa (kg)</div>
+        <div class="prop-row">
+          <input type="range" id="mass-slider" min="0.1" max="100" value="5" step="0.1" oninput="onMassSlider()">
+          <input type="number" id="mass-num" value="5.00" min="0.1" max="100" step="0.1" onchange="onMassNumber()">
+          <span class="prop-unit">kg</span>
+        </div>
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Forma</div>
+        <div class="shape-btns">
+          <button class="shape-btn active" onclick="setShape('cube',this)">Cubo</button>
+          <button class="shape-btn" onclick="setShape('sphere',this)">Sfera</button>
+          <button class="shape-btn" onclick="setShape('cylinder',this)">Cilindro</button>
+        </div>
+      </div>
+
+      <div class="forces-section">
+        <div class="forces-title">Forze in gioco</div>
+        <div class="force-row">
+          <div class="force-dot" style="background:#E24B4A"></div>
+          <span class="force-name">Peso (Fg)</span>
+          <span class="force-val" id="f-fg">—</span>
+          <div class="force-bar-wrap"><div class="force-bar" id="b-fg" style="background:#E24B4A"></div></div>
+        </div>
+        <div class="force-row">
+          <div class="force-dot" style="background:#378ADD"></div>
+          <span class="force-name">Normale (N)</span>
+          <span class="force-val" id="f-fn">—</span>
+          <div class="force-bar-wrap"><div class="force-bar" id="b-fn" style="background:#378ADD"></div></div>
+        </div>
+        <div class="force-row">
+          <div class="force-dot" style="background:#1D9E75"></div>
+          <span class="force-name">Attrito (Ff)</span>
+          <span class="force-val" id="f-ff">—</span>
+          <div class="force-bar-wrap"><div class="force-bar" id="b-ff" style="background:#1D9E75"></div></div>
+        </div>
+        <div class="force-row">
+          <div class="force-dot" style="background:#EF9F27"></div>
+          <span class="force-name">Risultante (Fr)</span>
+          <span class="force-val" id="f-fr">—</span>
+          <div class="force-bar-wrap"><div class="force-bar" id="b-fr" style="background:#EF9F27"></div></div>
+        </div>
+        <div class="status-line">
+          <span style="font-size:11px;color:rgba(255,255,255,0.4)">Stato:</span>
+          <span class="badge" id="status-badge">—</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="hint">Trascina per ruotare la camera • Scorri per zoom</div>
+
+  <script type="module" src="js/main.js"></script>
+
+  <script>
+    // togglePanel: apre/chiude il pannello e gestisce il chevron
+    function togglePanel(which, btn) {
+      const panel = document.getElementById('panel-' + which);
+      const isOpen = panel.classList.contains('open');
+
+      // Chiudi tutti
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+
+      // Se era chiuso, aprilo
+      if (!isOpen) {
+        panel.classList.add('open');
+        btn.classList.add('active');
+      }
+    }
+  </script>
+
+</body>
+</html>
