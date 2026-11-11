@@ -294,7 +294,7 @@ a:focus-visible {
 
 .experience {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr;
   gap: 0.35rem 0.95rem;
   align-items: start;
   padding: 0.95rem 0;
@@ -303,8 +303,8 @@ a:focus-visible {
   color: inherit;
 }
 
-.experience:not(:has(.experience-thumb)) {
-  grid-template-columns: 1fr;
+.experience.has-thumb {
+  grid-template-columns: auto 1fr;
 }
 
 .experience-thumb {
