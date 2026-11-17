@@ -286,9 +286,8 @@ export const makeAxes = (THREE, {
   return group
 }
 
-export const creditLine = (original, leo = 'LeoGalli') => {
-  const base = original ? String(original).trim() : ''
-  return base ? `${base} · Modificato da ${leo}` : `Modificato da ${leo}`
+export const creditLine = (original = '') => {
+  return String(original).trim()
 }
 
 /**
