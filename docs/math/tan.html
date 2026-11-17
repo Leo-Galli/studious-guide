@@ -1,316 +1,152 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tan Plot XR</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css">
-</head>
+    <link rel="stylesheet" href="/assets/xr-hud.css" />
+  </head>
   <body>
-    <div id="info">
-      <strong>Tan Plot XR</strong>
-      <div id="sliderContainer">
-        <span id="sliderLabel">x offset:</span>
-        <input type="range" id="xSlider" min="-31.4" max="31.4" step="0.1" value="0" />
-        <span id="xValue">0.0</span>
+    <a id="backButton" href="index.html">Torna a Matematica</a>
+
+    <div id="panel">
+      <div class="panel-inner">
+        <div class="ph">
+          <div>
+            <div class="ph-title">Tan Plot XR</div>
+            <div class="ph-sub">Grafico 3D di y = tan(x + offset)</div>
+          </div>
+        </div>
+
+        <div class="sec-label">Parametri</div>
+        <div class="sr">
+          <span class="sn">x</span>
+          <input type="range" id="xSlider" min="-31.4" max="31.4" step="0.1" value="0" />
+          <span class="sv" id="xValue">0.0</span>
+        </div>
+
+        <div class="formula" id="formulaBox">y = tan(x + 0.0)</div>
+
+        <div class="sec-label">Controlli</div>
+        <div class="info-vr">
+          Desktop: WASD/frecce per muoverti, QE su/giu, R reset vista.<br />
+          VR: stick sinistro muove, stick destro ruota e sale/scende.<br />
+          Grilletto: punta gli assi per ruotarli/spostarli, oppure il cursore VR per cambiare l'offset.
+        </div>
+
+        <div class="credit" id="creditBox"></div>
       </div>
-      <p style="margin-top: 0.6rem; margin-bottom: 0;">A 3D tangent plot is shown with x, y, and z axes. Grab a connected VR controller and use the select trigger to rotate and translate the axis group.</p>
     </div>
+
     <script type="module">
-      import * as THREE from '/vendor/three/build/three.module.js';
-      import { VRButton } from '/vendor/three/examples/jsm/webxr/VRButton.js';
+      import { createXrShell, makeAxes, makeTube, creditLine } from '/assets/xr-kit.js'
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.xr.enabled = true;
-      renderer.xr.setReferenceSpaceType('local');
-      document.body.appendChild(renderer.domElement);
-      document.body.appendChild(VRButton.createButton(renderer));
+      const { THREE, scene, startLoop, hideHudInVr, attachDrag } = createXrShell()
 
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x050a18);
+      const axes = makeAxes(THREE)
+      axes.position.set(0, 1.25, -0.5)
+      scene.add(axes)
 
-      const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.05, 100);
-      camera.position.set(0, 1.8, 4);
+      const TRACK_LEN = 1.4
+      const TRACK_HALF = TRACK_LEN / 2
+      const OFF_MIN = -31.4
+      const OFF_MAX = 31.4
 
-      const ambientLight = new THREE.HemisphereLight(0xffffff, 0x202035, 0.9);
-      scene.add(ambientLight);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(5, 7, 5);
-      scene.add(directionalLight);
+      const slider = new THREE.Group()
+      slider.position.set(0, 0.7, 0.1)
+      const track = new THREE.Mesh(
+        new THREE.BoxGeometry(TRACK_LEN, 0.04, 0.04),
+        new THREE.MeshStandardMaterial({ color: 0x2c3642, roughness: 0.8, metalness: 0.2 })
+      )
+      track.name = 'sliderTrack'
+      slider.add(track)
+      const thumb = new THREE.Mesh(
+        new THREE.BoxGeometry(0.12, 0.12, 0.12),
+        new THREE.MeshStandardMaterial({ color: 0xc8f542, emissive: 0xc8f542, emissiveIntensity: 0.3, roughness: 0.3, metalness: 0.5 })
+      )
+      thumb.name = 'sliderThumb'
+      slider.add(thumb)
+      scene.add(slider)
 
-      const floor = new THREE.Mesh(
-        new THREE.PlaneGeometry(10, 10),
-        new THREE.MeshStandardMaterial({ color: 0x081025, roughness: 0.95, metalness: 0.05 })
-      );
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = 0;
-      scene.add(floor);
+      let xOffset = 0
+      let curve = null
 
-      const grid = new THREE.GridHelper(8, 16, 0x204b8a, 0x10203a);
-      grid.position.y = 0.001;
-      scene.add(grid);
+      const xSlider = document.getElementById('xSlider')
+      const xValue = document.getElementById('xValue')
+      const formulaBox = document.getElementById('formulaBox')
+      document.getElementById('creditBox').textContent = creditLine('Laboratorio studious-guide · aab016')
 
-      const axesGroup = new THREE.Group();
-      axesGroup.position.set(0, 1.25, -0.5);
-      scene.add(axesGroup);
-
-      let tanCurve = null;
-      let xOffset = 0;
-
-      createAxes();
-      tanCurve = createTanCurve(xOffset);
-
-      const sliderGroup = createVRSlider();
-      scene.add(sliderGroup);
-
-      const controllers = [createController(0), createController(1)];
-      controllers.forEach((controller) => scene.add(controller));
-
-      const raycaster = new THREE.Raycaster();
-      const tempMatrix = new THREE.Matrix4();
-      let selectedController = null;
-      let selectedMode = null;
-      const controllerStartQuat = new THREE.Quaternion();
-      const axesStartQuat = new THREE.Quaternion();
-      const controllerStartPos = new THREE.Vector3();
-      const axesStartPos = new THREE.Vector3();
-      let sliderStartX = 0;
-      let sliderStartOffset = 0;
-
-      const xSlider = document.getElementById('xSlider');
-      const xValue = document.getElementById('xValue');
-      xSlider.addEventListener('input', onSliderChange);
-
-      window.addEventListener('resize', onWindowResize);
-      renderer.setAnimationLoop(render);
-
-      function onSliderChange(event) {
-        xOffset = parseFloat(event.target.value);
-        xValue.textContent = xOffset.toFixed(1);
-        updateTanCurve();
-        updateSliderThumb();
-      }
-
-      function updateTanCurve() {
-        if (tanCurve) {
-          axesGroup.remove(tanCurve);
+      const buildCurve = () => {
+        const segments = []
+        let seg = []
+        for (let x = -Math.PI * 4; x <= Math.PI * 4; x += 0.05) {
+          const y = Math.tan(x + xOffset) * 0.7
+          if (!isFinite(y) || Math.abs(y) > 2.2) {
+            if (seg.length > 1) segments.push(seg)
+            seg = []
+            continue
+          }
+          seg.push(new THREE.Vector3((x + xOffset) * 0.28, y, 0))
         }
-        tanCurve = createTanCurve(xOffset);
+        if (seg.length > 1) segments.push(seg)
+        if (curve) axes.remove(curve)
+        curve = makeTube(THREE, segments, { radius: 0.03 })
+        curve.position.y = 0.02
+        axes.add(curve)
       }
 
-      function updateSliderThumb() {
-        const thumbMesh = sliderGroup.getObjectByName('sliderThumb');
-        if (thumbMesh) {
-          const minX = -3.14;
-          const maxX = 3.14;
-          const trackLength = maxX - minX;
-          const normalizedValue = (xOffset - (-31.4)) / (31.4 - (-31.4));
-          thumbMesh.position.x = minX + normalizedValue * trackLength;
+      const syncThumb = () => {
+        const norm = (xOffset - OFF_MIN) / (OFF_MAX - OFF_MIN)
+        thumb.position.x = -TRACK_HALF + norm * TRACK_LEN
+      }
+
+      const applyOffset = (value) => {
+        xOffset = Math.max(OFF_MIN, Math.min(OFF_MAX, value))
+        xSlider.value = xOffset
+        xValue.textContent = xOffset.toFixed(1)
+        formulaBox.textContent = `y = tan(x + ${xOffset.toFixed(1)})`
+        buildCurve()
+        syncThumb()
+      }
+
+      xSlider.addEventListener('input', (e) => applyOffset(parseFloat(e.target.value)))
+
+      const sliderDrag = { startX: 0, startOffset: 0 }
+      const drag = attachDrag([axes, slider], {
+        onHit: (hit) => {
+          if (hit.object.name === 'sliderThumb' || hit.object.name === 'sliderTrack') {
+            sliderDrag.startX = hit.point.x
+            sliderDrag.startOffset = xOffset
+            return { mode: 'slider' }
+          }
+          return undefined
         }
+      })
+
+      const rayM = new THREE.Matrix4()
+      const ray = new THREE.Raycaster()
+      const sliderRayX = (controller) => {
+        rayM.identity().extractRotation(controller.matrixWorld)
+        ray.ray.origin.setFromMatrixPosition(controller.matrixWorld)
+        ray.ray.direction.set(0, 0, -1).applyMatrix4(rayM)
+        const hits = ray.intersectObjects(slider.children, true)
+        return hits.length ? hits[0].point.x : null
       }
 
-      function createVRSlider() {
-        const group = new THREE.Group();
-        group.position.set(0, 0.5, 0.2);
+      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton')])
 
-        const trackGeometry = new THREE.BoxGeometry(6.28, 0.06, 0.06);
-        const trackMaterial = new THREE.MeshStandardMaterial({ color: 0x1a3a5c, roughness: 0.8, metalness: 0.2 });
-        const track = new THREE.Mesh(trackGeometry, trackMaterial);
-        track.name = 'sliderTrack';
-        group.add(track);
+      applyOffset(0)
 
-        const thumbGeometry = new THREE.BoxGeometry(0.2, 0.15, 0.15);
-        const thumbMaterial = new THREE.MeshStandardMaterial({ color: 0x88c8ff, roughness: 0.3, metalness: 0.6, emissive: 0x44a0ff, emissiveIntensity: 0.3 });
-        const thumb = new THREE.Mesh(thumbGeometry, thumbMaterial);
-        thumb.name = 'sliderThumb';
-        thumb.position.x = 0;
-        group.add(thumb);
-
-        return group;
-      }
-
-      function createAxes() {
-        const material = new THREE.MeshStandardMaterial({ color: 0x88c8ff, roughness: 0.3, metalness: 0.2 });
-        const length = 3.0;
-        const thickness = 0.03;
-
-        const xAxis = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), material);
-        xAxis.rotation.z = -Math.PI / 2;
-        xAxis.position.x = length / 2;
-        axesGroup.add(xAxis);
-
-        const yAxis = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), material);
-        yAxis.position.y = length / 2;
-        axesGroup.add(yAxis);
-
-        const zAxis = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), material);
-        zAxis.rotation.x = Math.PI / 2;
-        zAxis.position.z = length / 2;
-        axesGroup.add(zAxis);
-
-        const arrow = new THREE.ConeGeometry(0.08, 0.26, 16);
-        const xArrow = new THREE.Mesh(arrow, material);
-        xArrow.rotation.z = -Math.PI / 2;
-        xArrow.position.set(length, 0, 0);
-        axesGroup.add(xArrow);
-
-        const yArrow = new THREE.Mesh(arrow, material);
-        yArrow.position.set(0, length, 0);
-        axesGroup.add(yArrow);
-
-        const zArrow = new THREE.Mesh(arrow, material);
-        zArrow.rotation.x = Math.PI / 2;
-        zArrow.position.set(0, 0, length);
-        axesGroup.add(zArrow);
-
-        axesGroup.add(createLabel('X', length + 0.2, 0, 0));
-        axesGroup.add(createLabel('Y', 0, length + 0.2, 0));
-        axesGroup.add(createLabel('Z', 0, 0, length + 0.2));
-      }
-
-      function createLabel(text, x, y, z) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 128;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(5, 9, 24, 0.0)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = 'bold 70px system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#ccf6ff';
-        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.encoding = THREE.sRGBEncoding;
-
-        const label = new THREE.Mesh(
-          new THREE.PlaneGeometry(0.4, 0.2),
-          new THREE.MeshBasicMaterial({ map: texture, transparent: true })
-        );
-        label.position.set(x, y, z);
-        label.lookAt(camera.position);
-        return label;
-      }
-
-      function createTanCurve(xOff) {
-        const points = [];
-        const start = -Math.PI * 4;
-        const end = Math.PI * 4;
-        const step = 0.08;
-        for (let x = start; x <= end; x += step) {
-          points.push(new THREE.Vector3((x + xOff) * 0.28, Math.tan(x + xOff) * 0.7, 0));
-        }
-
-        const curveGeometry = new THREE.BufferGeometry().setFromPoints(points);
-        const curveMaterial = new THREE.LineBasicMaterial({ color: 0xffd568, linewidth: 2 });
-        const curve = new THREE.Line(curveGeometry, curveMaterial);
-        curve.position.y = 0.02;
-        axesGroup.add(curve);
-        return curve;
-      }
-
-      function createController(index) {
-        const controller = renderer.xr.getController(index);
-        controller.addEventListener('selectstart', onSelectStart);
-        controller.addEventListener('selectend', onSelectEnd);
-
-        const ray = new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)]),
-          new THREE.LineBasicMaterial({ color: 0x88c8ff })
-        );
-        ray.name = 'ray';
-        ray.scale.z = 6;
-        controller.add(ray);
-
-        const pointer = new THREE.Mesh(
-          new THREE.SphereGeometry(0.015, 16, 12),
-          new THREE.MeshBasicMaterial({ color: 0x88c8ff, opacity: 0.9, transparent: true })
-        );
-        pointer.position.set(0, 0, -1);
-        controller.add(pointer);
-
-        return controller;
-      }
-
-      function onSelectStart(event) {
-        const controller = event.target;
-        const intersections = getControllerIntersections(controller);
-        if (intersections.length) {
-          const hitObject = intersections[0].object;
-          if (hitObject.name === 'sliderThumb') {
-            selectedMode = 'slider';
-            selectedController = controller;
-            sliderStartX = intersections[0].point.x;
-            sliderStartOffset = xOffset;
-          } else if (hitObject.name === 'sliderTrack') {
-            selectedMode = 'slider';
-            selectedController = controller;
-            sliderStartX = intersections[0].point.x;
-            sliderStartOffset = xOffset;
-          } else {
-            selectedMode = 'transform';
-            selectedController = controller;
-            controllerStartQuat.copy(controller.quaternion);
-            axesStartQuat.copy(axesGroup.quaternion);
-            controllerStartPos.setFromMatrixPosition(controller.matrixWorld);
-            axesStartPos.copy(axesGroup.position);
+      startLoop(() => {
+        drag.updateDrag()
+        if (drag.getMode() === 'slider' && drag.getSelected()) {
+          const x = sliderRayX(drag.getSelected())
+          if (x !== null) {
+            const delta = (x - sliderDrag.startX) / TRACK_LEN
+            applyOffset(sliderDrag.startOffset + delta * (OFF_MAX - OFF_MIN))
           }
         }
-      }
-
-      function onSelectEnd() {
-        selectedController = null;
-        selectedMode = null;
-      }
-
-      function getControllerIntersections(controller) {
-        tempMatrix.identity().extractRotation(controller.matrixWorld);
-        raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-        raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-        return raycaster.intersectObjects(sliderGroup.children, true).concat(raycaster.intersectObjects(axesGroup.children, true));
-      }
-
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
-
-      function render() {
-        if (selectedController && selectedMode === 'transform') {
-          const currentQuat = selectedController.quaternion.clone();
-          const deltaQuat = currentQuat.multiply(controllerStartQuat.clone().invert());
-          axesGroup.quaternion.copy(axesStartQuat).premultiply(deltaQuat);
-
-          const currentPos = new THREE.Vector3().setFromMatrixPosition(selectedController.matrixWorld);
-          const deltaPos = currentPos.clone().sub(controllerStartPos);
-          axesGroup.position.copy(axesStartPos).add(deltaPos);
-        } else if (selectedController && selectedMode === 'slider') {
-          tempMatrix.identity().extractRotation(selectedController.matrixWorld);
-          raycaster.ray.origin.setFromMatrixPosition(selectedController.matrixWorld);
-          raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-          const sliderIntersections = raycaster.intersectObjects(sliderGroup.children, true);
-          if (sliderIntersections.length) {
-            const currentX = sliderIntersections[0].point.x;
-            const deltaX = currentX - sliderStartX;
-            const minX = -3.14;
-            const maxX = 3.14;
-            const trackLength = maxX - minX;
-            const normalizedDelta = deltaX / trackLength;
-            const offsetRange = 31.4 - (-31.4);
-            xOffset = sliderStartOffset + normalizedDelta * offsetRange;
-            xOffset = Math.max(-31.4, Math.min(31.4, xOffset));
-            xSlider.value = xOffset;
-            xValue.textContent = xOffset.toFixed(1);
-            updateTanCurve();
-            updateSliderThumb();
-          }
-        }
-        renderer.render(scene, camera);
-      }
+      })
     </script>
   </body>
 </html>

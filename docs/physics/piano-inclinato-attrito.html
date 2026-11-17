@@ -19,6 +19,8 @@
 </head>
 <body>
 
+  <a id="back-link" href="index.html" style="position:fixed;left:16px;top:16px;z-index:50;padding:8px 14px;border:1px solid rgba(236,232,225,0.18);background:rgba(22,29,38,0.96);color:#ece8e1;font:600 13px system-ui,sans-serif;text-decoration:none;">Torna a Fisica</a>
+
   <canvas id="sim-canvas"></canvas>
 
   <!-- UI overlay -->
@@ -26,7 +28,7 @@
 
     <!-- AMBIENTE -->
     <button class="menu-btn env" onclick="togglePanel('env', this)">
-      🌍 Ambiente
+      Ambiente
       <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M3 5l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
@@ -44,7 +46,7 @@
 
     <!-- PIANO -->
     <button class="menu-btn plane" onclick="togglePanel('plane', this)">
-      📐 Piano inclinato
+      Piano inclinato
       <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M3 5l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
@@ -69,7 +71,7 @@
 
     <!-- OGGETTO -->
     <button class="menu-btn obj" onclick="togglePanel('obj', this)">
-      📦 Oggetto
+      Oggetto
       <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M3 5l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
@@ -127,7 +129,7 @@
 
   </div>
 
-  <div id="hint">Trascina per ruotare la camera • Scorri per zoom</div>
+  <div id="hint">Trascina per ruotare la camera &middot; Scorri per zoom &middot; Nota: locomotion diversa dalle scene WebXR (camera orbitale, niente WASD/visore) &middot; 2025-26 IV A INF &middot; Modificato da LeoGalli</div>
 
   <script type="module" src="js/main.js"></script>
 

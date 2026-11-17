@@ -3,69 +3,95 @@
 <html lang="it">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Chronos SPQR | Linea del Tempo VR</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#0b0f14">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { 
-            margin: 0; 
-            background: #050508; 
-            color: #ffffff; 
-            font-family: 'Inter', sans-serif; 
-            overflow: hidden; 
+        body {
+            margin: 0;
+            background: #0b0f14;
+            color: #ece8e1;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            overflow: hidden;
         }
-        .hero { 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            background: radial-gradient(circle at center, #e90f8e 0%, #eb09e4 100%); 
+        .back-link {
+            position: fixed;
+            left: 1rem;
+            top: 1rem;
+            z-index: 12;
+            padding: 0.45rem 0.8rem;
+            border: 1px solid rgba(236, 232, 225, 0.14);
+            background: rgba(22, 29, 38, 0.96);
+            color: #ece8e1;
+            font: 600 0.8rem 'IBM Plex Sans', system-ui, sans-serif;
+            text-decoration: none;
         }
-        h1 { 
-            font-family: 'Cinzel', serif; 
-            font-size: 4rem; 
-            color: #00fff0; 
-            margin: 0; 
-            letter-spacing: 6px; 
-            text-shadow: 0 0 30px rgba(0, 255, 240, 0.4); 
+        .back-link:hover,
+        .back-link:focus-visible {
+            border-color: #c8f542;
+            color: #c8f542;
+            outline: none;
+        }
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #121820 0%, #0b0f14 100%);
             text-align: center;
+            padding: 0 1.5rem;
+        }
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            color: #c8f542;
+            margin: 0;
+            letter-spacing: 6px;
+            text-shadow: 0 0 30px rgba(200, 245, 66, 0.25);
         }
         .subtitle {
             font-family: 'Cinzel', serif;
-            color: #8e9bb0;
+            color: #9aa3ad;
             letter-spacing: 3px;
             margin-top: 10px;
             font-size: 1.1rem;
         }
-        p { 
-            font-size: 1.1rem; 
-            color: #a2aab8; 
-            max-width: 600px; 
-            text-align: center; 
-            line-height: 1.8; 
+        p {
+            font-size: 1.1rem;
+            color: #9aa3ad;
+            max-width: 600px;
+            line-height: 1.8;
             margin-top: 25px;
         }
         .cta-container { margin-top: 40px; }
-        .btn { 
-            padding: 16px 40px; 
-            border-radius: 0px; 
-            text-decoration: none; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            transition: all 0.3s ease; 
-            border: 2px solid #00fff0; 
-            background: transparent; 
-            color: #00fff0;
+        .btn {
+            padding: 16px 40px;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            border: 2px solid #c8f542;
+            background: transparent;
+            color: #c8f542;
         }
-        .btn:hover { 
-            background: #00fff0; 
-            color: #d8d8f6;
-            box-shadow: 0 0 30px rgba(0, 255, 240, 0.6); 
+        .btn:hover {
+            background: #c8f542;
+            color: #0b0f14;
+            box-shadow: 0 0 30px rgba(200, 245, 66, 0.4);
+        }
+        .credit {
+            margin-top: 48px;
+            font-size: 0.72rem;
+            color: #9aa3ad;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
+    <a class="back-link" href="index.html">Torna a Storia</a>
     <div class="hero">
         <h1>CHRONOS S.P.Q.R.</h1>
         <div class="subtitle">Attraverso lo Spazio-Tempo Romano</div>
@@ -73,6 +99,7 @@
         <div class="cta-container">
             <a href="roman-empire.html" class="btn">Avvia il Viaggio nel Tempo</a>
         </div>
+        <div class="credit">2025-26 IV A INF &middot; Modificato da LeoGalli</div>
     </div>
 </body>
 </html>

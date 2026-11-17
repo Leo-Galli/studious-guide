@@ -1,225 +1,139 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HomeXR</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css">
-</head>
+    <link rel="stylesheet" href="/assets/xr-hud.css" />
+  </head>
   <body>
-    <div id="info">
-      <strong>HomeXR</strong>
-      Four interactive VR buttons are visible in the scene: <em>sin</em>, <em>tan</em>, <em>atan</em>, <em>cos</em>, and <em>fx</em>.
-      Each connected VR controller shows its own pointer and can trigger the press animation.
+    <a id="backButton" href="index.html">Torna a Matematica</a>
+
+    <div id="panel">
+      <div class="panel-inner">
+        <div class="ph">
+          <div>
+            <div class="ph-title">HomeXR</div>
+            <div class="ph-sub">Hub delle esperienze di Matematica XR</div>
+          </div>
+        </div>
+
+        <div class="sec-label">Esperienze</div>
+        <div class="action-grid">
+          <a class="act-btn" href="sin.html">sin</a>
+          <a class="act-btn" href="cos.html">cos</a>
+          <a class="act-btn" href="tan.html">tan</a>
+          <a class="act-btn" href="atan.html">atan</a>
+          <a class="act-btn" href="fx.html">f(x)</a>
+          <a class="act-btn" href="sphere.html">sfera</a>
+          <a class="act-btn" href="a_x_minus_b_over_x.html">a·x−b/x</a>
+        </div>
+
+        <div class="sec-label">Controlli</div>
+        <div class="info-vr">
+          Desktop: WASD/frecce per muoverti, QE su/giu, R reset vista. Clicca un portale per aprirlo.<br />
+          VR: stick sinistro muove, stick destro ruota e sale/scende.<br />
+          Grilletto: punta un portale con il laser per entrare nell'esperienza.
+        </div>
+
+        <div class="credit" id="creditBox"></div>
+      </div>
     </div>
+
     <script type="module">
-      import * as THREE from '/vendor/three/build/three.module.js';
-      import { VRButton } from '/vendor/three/examples/jsm/webxr/VRButton.js';
+      import { createXrShell, creditLine } from '/assets/xr-kit.js'
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.xr.enabled = true;
-      renderer.xr.setReferenceSpaceType('local');
-      document.body.appendChild(renderer.domElement);
-      document.body.appendChild(VRButton.createButton(renderer));
+      const { THREE, scene, camera, renderer, startLoop, hideHudInVr, attachDrag } = createXrShell()
 
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x040615);
+      document.getElementById('creditBox').textContent = creditLine('Laboratorio studious-guide · aab016')
 
-      const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 1.6, 3);
+      const portals = [
+        { label: 'sin', href: 'sin.html' },
+        { label: 'cos', href: 'cos.html' },
+        { label: 'tan', href: 'tan.html' },
+        { label: 'atan', href: 'atan.html' },
+        { label: 'f(x)', href: 'fx.html' },
+        { label: 'sfera', href: 'sphere.html' },
+        { label: 'a·x−b/x', href: 'a_x_minus_b_over_x.html' }
+      ]
 
-      const ambientLight = new THREE.HemisphereLight(0xffffff, 0x404060, 1.2);
-      scene.add(ambientLight);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(2, 4, 3);
-      scene.add(directionalLight);
-
-      const floor = new THREE.Mesh(
-        new THREE.PlaneGeometry(10, 10),
-        new THREE.MeshStandardMaterial({ color: 0x101025, roughness: 0.95, metalness: 0.05 })
-      );
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = 0;
-      scene.add(floor);
-
-      const buttonRoot = new THREE.Group();
-      const labels = ['sin', 'tan', 'atan', 'cos', 'fx'];
-      labels.forEach((label, index) => {
-        const button = createButton(label);
-        button.position.set((index - 1.5) * 0.92, 1.4, -1.2);
-        buttonRoot.add(button);
-      });
-      scene.add(buttonRoot);
-
-      const guideRing = new THREE.Mesh(
-        new THREE.TorusGeometry(0.4, 0.01, 16, 120),
-        new THREE.MeshStandardMaterial({ color: 0x5c7cff, opacity: 0.3, transparent: true })
-      );
-      guideRing.rotation.x = -Math.PI / 2;
-      guideRing.position.set(0, 0.01, -1.2);
-      scene.add(guideRing);
-
-      const controllers = [createController(0), createController(1)];
-      controllers.forEach((controller) => scene.add(controller));
-
-      const raycaster = new THREE.Raycaster();
-      const tempMatrix = new THREE.Matrix4();
-      const pointer = new THREE.Vector2();
-      let selectedButton = null;
-      const animationTargets = [];
-
-      window.addEventListener('resize', onWindowResize);
-      renderer.domElement.addEventListener('pointerdown', onPointerDown);
-      renderer.setAnimationLoop(render);
-
-      function createButton(label) {
-        const group = new THREE.Group();
-        const body = new THREE.Mesh(
-          new THREE.BoxGeometry(0.8, 0.25, 0.08),
-          new THREE.MeshStandardMaterial({ color: 0x2b5eff, roughness: 0.35, metalness: 0.18 })
-        );
-        body.castShadow = true;
-        body.receiveShadow = true;
-        group.add(body);
-
-        const labelMesh = createLabelPlane(label);
-        labelMesh.position.set(0, 0, 0.049);
-        group.add(labelMesh);
-
-        group.userData = { pressed: false, label: label };
-        return group;
-      }
-
-      function createLabelPlane(text) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 256;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#0f1732';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = 'bold 120px system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#eff8ff';
-        ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 10);
-        ctx.lineWidth = 8;
-        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-        ctx.strokeText(text, canvas.width / 2, canvas.height / 2 + 10);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.encoding = THREE.sRGBEncoding;
-        texture.needsUpdate = true;
-
+      const labelPlane = (text) => {
+        const canvas = document.createElement('canvas')
+        canvas.width = 512
+        canvas.height = 256
+        const ctx = canvas.getContext('2d')
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.font = 'bold 110px IBM Plex Sans, system-ui, sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillStyle = '#0b0f14'
+        ctx.fillText(text, canvas.width / 2 + 3, canvas.height / 2 + 3)
+        ctx.fillStyle = '#c8f542'
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2)
+        const texture = new THREE.CanvasTexture(canvas)
         return new THREE.Mesh(
-          new THREE.PlaneGeometry(0.72, 0.22),
+          new THREE.PlaneGeometry(0.76, 0.38),
           new THREE.MeshBasicMaterial({ map: texture, transparent: true })
-        );
+        )
       }
 
-      function createController(index) {
-        const controller = renderer.xr.getController(index);
-        controller.addEventListener('selectstart', onSelectStart);
-        controller.addEventListener('selectend', onSelectEnd);
+      const buttonRoot = new THREE.Group()
+      const bodyMat = () => new THREE.MeshStandardMaterial({ color: 0x161d26, roughness: 0.5, metalness: 0.2, emissive: 0x0b0f14 })
+      const count = portals.length
 
-        const controllerLine = new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)]),
-          new THREE.LineBasicMaterial({ color: 0x88c8ff })
-        );
-        controllerLine.name = 'ray';
-        controllerLine.scale.z = 5;
-        controller.add(controllerLine);
+      portals.forEach((portal, i) => {
+        const group = new THREE.Group()
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.42, 0.08), bodyMat())
+        group.add(body)
+        const label = labelPlane(portal.label)
+        label.position.z = 0.05
+        group.add(label)
 
-        const controllerPointer = new THREE.Mesh(
-          new THREE.SphereGeometry(0.012, 16, 12),
-          new THREE.MeshBasicMaterial({ color: 0x88c8ff, opacity: 0.95, transparent: true })
-        );
-        controllerPointer.position.set(0, 0, -1);
-        controller.add(controllerPointer);
+        const angle = (i - (count - 1) / 2) * 0.42
+        group.position.set(Math.sin(angle) * 2.6, 1.5, -2.2 - (1 - Math.cos(angle)) * 1.2)
+        group.rotation.y = -angle
+        group.userData = { href: portal.href, body }
+        buttonRoot.add(group)
+      })
+      scene.add(buttonRoot)
 
-        return controller;
+      const findPortal = (object) => {
+        let node = object
+        while (node && !buttonRoot.children.includes(node)) node = node.parent
+        return node
       }
 
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+      let navigating = false
+      const enter = (group) => {
+        if (navigating || !group) return
+        navigating = true
+        group.userData.body.material.emissive.setHex(0x4a6010)
+        group.scale.setScalar(0.92)
+        setTimeout(() => { window.location.href = group.userData.href }, 160)
       }
 
-      function onPointerDown(event) {
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(pointer, camera);
-        const hit = raycaster.intersectObjects(buttonRoot.children, true)[0];
-        if (hit) {
-          pressButton(getButtonGroup(hit.object));
+      const drag = attachDrag([buttonRoot], {
+        onHit: (hit) => {
+          enter(findPortal(hit.object))
+          return false
         }
-      }
+      })
 
-      function onSelectStart(event) {
-        const controller = event.target;
-        const intersections = getControllerIntersections(controller);
-        if (intersections.length) {
-          selectedButton = getButtonGroup(intersections[0].object);
-          pressButton(selectedButton);
-        }
-      }
+      const pointer = new THREE.Vector2()
+      const rc = new THREE.Raycaster()
+      renderer.domElement.addEventListener('pointerdown', (e) => {
+        pointer.x = (e.clientX / window.innerWidth) * 2 - 1
+        pointer.y = -(e.clientY / window.innerHeight) * 2 + 1
+        rc.setFromCamera(pointer, camera)
+        const hit = rc.intersectObjects(buttonRoot.children, true)[0]
+        if (hit) enter(findPortal(hit.object))
+      })
 
-      function onSelectEnd() {
-        selectedButton = null;
-      }
+      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton')])
 
-      function getControllerIntersections(controller) {
-        tempMatrix.identity().extractRotation(controller.matrixWorld);
-        raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-        raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-        return raycaster.intersectObjects(buttonRoot.children, true);
-      }
-
-      function getButtonGroup(object) {
-        return object.parent.type === 'Group' ? object.parent : object;
-      }
-
-      function pressButton(button) {
-        if (!button || button.userData.pressed) return;
-        button.userData.pressed = true;
-        animationTargets.push({ button, start: performance.now(), phase: 'down' });
-
-        setTimeout(() => {
-          animationTargets.push({ button, start: performance.now(), phase: 'up' });
-        }, 120);
-
-        setTimeout(() => {
-          button.userData.pressed = false;
-          if (button.userData.label === 'sin') {
-            window.location.href = 'sin.html';
-          } else if (button.userData.label === 'tan') {
-            window.location.href = 'tan.html';
-          } else if (button.userData.label === 'atan') {
-            window.location.href = 'atan.html';
-          } else if (button.userData.label === 'cos') {
-            window.location.href = 'cos.html';
-          } else if (button.userData.label === 'fx') {
-            window.location.href = 'fx.html';
-          }
-        }, 240);
-      }
-
-      function render() {
-        const now = performance.now();
-        for (let i = animationTargets.length - 1; i >= 0; i -= 1) {
-          const item = animationTargets[i];
-          const elapsed = (now - item.start) / 120;
-          const progress = Math.min(elapsed, 1);
-          const targetScale = item.phase === 'down' ? 0.92 : 1;
-          const startScale = item.phase === 'down' ? 1 : 0.92;
-          const scale = THREE.MathUtils.lerp(startScale, targetScale, progress);
-          item.button.scale.setScalar(scale);
-          if (progress >= 1) animationTargets.splice(i, 1);
-        }
-        renderer.render(scene, camera);
-      }
+      startLoop(() => {
+        drag.updateDrag()
+      })
     </script>
   </body>
 </html>

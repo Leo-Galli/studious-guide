@@ -1,423 +1,185 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>a*x - b/x Plot XR</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css">
-</head>
+    <link rel="stylesheet" href="/assets/xr-hud.css" />
+  </head>
   <body>
-    <div id="info">
-      <strong>a*x - b/x Plot XR</strong>
-      <div class="sliderRow">
-        <span>a:</span>
-        <input type="range" id="aSlider" min="-5" max="5" step="0.1" value="1" />
-        <span id="aValue" class="valueLabel">1.0</span>
+    <a id="backButton" href="index.html">Torna a Matematica</a>
+
+    <div id="panel">
+      <div class="panel-inner">
+        <div class="ph">
+          <div>
+            <div class="ph-title">a·x − b/x Plot XR</div>
+            <div class="ph-sub">Funzione razionale f(x) = a·x − b/x</div>
+          </div>
+        </div>
+
+        <div class="sec-label">Parametri Dinamici</div>
+        <div class="sr">
+          <span class="sn">a</span>
+          <input type="range" id="aSlider" min="-5" max="5" step="0.1" value="1" />
+          <span class="sv" id="aValue">1.0</span>
+        </div>
+        <div class="sr">
+          <span class="sn">b</span>
+          <input type="range" id="bSlider" min="0.1" max="10" step="0.1" value="1" />
+          <span class="sv" id="bValue">1.0</span>
+        </div>
+
+        <div class="formula" id="formulaBox">f(x) = 1.0*x - 1.0/x</div>
+
+        <div class="sec-label">Controlli</div>
+        <div class="info-vr">
+          Desktop: WASD/frecce per muoverti, QE su/giu, R reset vista.<br />
+          VR: stick sinistro muove, stick destro ruota e sale/scende.<br />
+          Grilletto: punta gli assi per ruotarli/spostarli, oppure i cursori VR a e b.
+        </div>
+
+        <div class="credit" id="creditBox"></div>
       </div>
-      <div class="sliderRow">
-        <span>b:</span>
-        <input type="range" id="bSlider" min="0.1" max="10" step="0.1" value="1" />
-        <span id="bValue" class="valueLabel">1.0</span>
-      </div>
-      <div id="formulaBox">f(x) = 1.0*x - 1.0/x</div>
-      <p style="margin-top: 0.7rem; margin-bottom: 0;">A 3D plot of f(x) = a*x - b/x is shown with x, y, and z axes. One slider adjusts a, and one slider adjusts b. Grab a connected VR controller and use the select trigger to rotate and translate the axis group, or grab the VR sliders to adjust a and b in VR.</p>
     </div>
+
     <script type="module">
-      import * as THREE from '/vendor/three/build/three.module.js';
-      import { VRButton } from '/vendor/three/examples/jsm/webxr/VRButton.js';
+      import { createXrShell, makeAxes, makeTube, creditLine } from '/assets/xr-kit.js'
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.xr.enabled = true;
-      renderer.xr.setReferenceSpaceType('local');
-      document.body.appendChild(renderer.domElement);
-      document.body.appendChild(VRButton.createButton(renderer));
+      const { THREE, scene, startLoop, hideHudInVr, attachDrag } = createXrShell()
 
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x050a18);
+      const axes = makeAxes(THREE)
+      axes.position.set(0, 1.25, -2.4)
+      scene.add(axes)
 
-      const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.05, 100);
-      camera.position.set(0, 1.8, 4);
+      const TRACK_LEN = 1.4
+      const TRACK_HALF = TRACK_LEN / 2
 
-      const ambientLight = new THREE.HemisphereLight(0xffffff, 0x202035, 0.9);
-      scene.add(ambientLight);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(5, 7, 5);
-      scene.add(directionalLight);
-
-      const floor = new THREE.Mesh(
-        new THREE.PlaneGeometry(10, 10),
-        new THREE.MeshStandardMaterial({ color: 0x081025, roughness: 0.95, metalness: 0.05 })
-      );
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = 0;
-      scene.add(floor);
-
-      const grid = new THREE.GridHelper(8, 16, 0x204b8a, 0x10203a);
-      grid.position.y = 0.001;
-      scene.add(grid);
-
-      const axesGroup = new THREE.Group();
-      axesGroup.position.set(0, 1.25, -4);
-      scene.add(axesGroup);
-
-      let fxCurve = null;
-      let a = 1;
-      let b = 1;
-      let formulaMesh = null;
-
-      createAxes();
-      fxCurve = createFxCurve(a, b);
-      formulaMesh = createFormulaLabel(a, b);
-
-      const aSliderGroup = createVRSlider('a');
-      aSliderGroup.position.set(0, 1.0, -2);
-      scene.add(aSliderGroup);
-
-      const bSliderGroup = createVRSlider('b');
-      bSliderGroup.position.set(0, 0.5, -2);
-      scene.add(bSliderGroup);
-
-      updateSliderThumb('a', a);
-      updateSliderThumb('b', b);
-
-      const controllers = [createController(0), createController(1)];
-      controllers.forEach((controller) => scene.add(controller));
-
-      const raycaster = new THREE.Raycaster();
-      const tempMatrix = new THREE.Matrix4();
-      let selectedController = null;
-      let selectedMode = null;
-      const controllerStartQuat = new THREE.Quaternion();
-      const axesStartQuat = new THREE.Quaternion();
-      const controllerStartPos = new THREE.Vector3();
-      const axesStartPos = new THREE.Vector3();
-      let sliderStartX = 0;
-      let sliderStartValue = 0;
-
-      const aSlider = document.getElementById('aSlider');
-      const formulaBox = document.getElementById('formulaBox');
-      
-      const bSlider = document.getElementById('bSlider');
-      const aValue = document.getElementById('aValue');
-      const bValue = document.getElementById('bValue');
-
-      aSlider.addEventListener('input', onParameterChange);
-      
-      bSlider.addEventListener('input', onParameterChange);
-
-      window.addEventListener('resize', onWindowResize);
-      renderer.setAnimationLoop(render);
-
-      function onParameterChange() {
-        a = parseFloat(aSlider.value);
-        b = parseFloat(bSlider.value);
-        aValue.textContent = a.toFixed(1);
-        bValue.textContent = b.toFixed(1);
-        updateFxCurve();
-        updateFormulaBox();
-        updateSliderThumb('a', a);
-        updateSliderThumb('b', b);
+      const makeSlider = (name, min, max) => {
+        const group = new THREE.Group()
+        const track = new THREE.Mesh(
+          new THREE.BoxGeometry(TRACK_LEN, 0.04, 0.04),
+          new THREE.MeshStandardMaterial({ color: 0x2c3642, roughness: 0.8, metalness: 0.2 })
+        )
+        track.name = name + 'Track'
+        group.add(track)
+        const thumb = new THREE.Mesh(
+          new THREE.BoxGeometry(0.12, 0.12, 0.12),
+          new THREE.MeshStandardMaterial({ color: 0xc8f542, emissive: 0xc8f542, emissiveIntensity: 0.3, roughness: 0.3, metalness: 0.5 })
+        )
+        thumb.name = name + 'Thumb'
+        group.add(thumb)
+        group.userData = { min, max }
+        return group
       }
 
-      function updateFxCurve() {
-        if (fxCurve) {
-          axesGroup.remove(fxCurve);
-        }
-        fxCurve = createFxCurve(a, b);
-      }
+      const aGroup = makeSlider('a', -5, 5)
+      aGroup.position.set(0, 1.0, -1.2)
+      scene.add(aGroup)
+      const bGroup = makeSlider('b', 0.1, 10)
+      bGroup.position.set(0, 0.55, -1.2)
+      scene.add(bGroup)
 
-      function updateSliderThumb(name, value) {
-        const thumbMesh = scene.getObjectByName(name + '_thumb');
-        if (thumbMesh) {
-          const minX = -3.14;
-          const maxX = 3.14;
-          const trackLength = maxX - minX;
-          let minVal, maxVal;
-          if (name === 'a') {
-            minVal = -5;
-            maxVal = 5;
-          } else {
-            minVal = 0.1;
-            maxVal = 10;
+      let a = 1
+      let b = 1
+      let curve = null
+
+      const aSlider = document.getElementById('aSlider')
+      const bSlider = document.getElementById('bSlider')
+      const aValue = document.getElementById('aValue')
+      const bValue = document.getElementById('bValue')
+      const formulaBox = document.getElementById('formulaBox')
+      document.getElementById('creditBox').textContent = creditLine('Laboratorio studious-guide · aab016')
+
+      const buildCurve = () => {
+        const segments = []
+        let seg = []
+        for (let x = -Math.PI * 4; x <= Math.PI * 4; x += 0.05) {
+          if (Math.abs(x) < 0.08) {
+            if (seg.length > 1) segments.push(seg)
+            seg = []
+            continue
           }
-          const normalizedValue = (value - minVal) / (maxVal - minVal);
-          thumbMesh.position.x = minX + normalizedValue * trackLength;
+          const y = (a * x - b / x) * 0.7
+          if (!isFinite(y) || Math.abs(y) > 2.6) {
+            if (seg.length > 1) segments.push(seg)
+            seg = []
+            continue
+          }
+          seg.push(new THREE.Vector3(x * 0.28, y, 0))
         }
+        if (seg.length > 1) segments.push(seg)
+        if (curve) axes.remove(curve)
+        curve = makeTube(THREE, segments, { radius: 0.03 })
+        curve.position.y = 0.02
+        axes.add(curve)
       }
 
-      function updateFormulaBox() {
-        const bText = b < 0 ? `+ ${Math.abs(b).toFixed(1)}/x` : `- ${b.toFixed(1)}/x`;
-        const text = `f(x) = ${a.toFixed(1)}*x ${bText}`;
-        formulaBox.textContent = text;
+      const syncThumb = (group, value) => {
+        const { min, max } = group.userData
+        const norm = (value - min) / (max - min)
+        group.children[1].position.x = -TRACK_HALF + norm * TRACK_LEN
+      }
 
-        // Update 3D label
-        if (formulaMesh) {
-          const canvas = formulaMesh.material.map.image;
-          const ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = 'rgba(5, 9, 24, 0.0)';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.font = 'bold 80px system-ui, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#dbe8ff';
-          ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-          formulaMesh.material.map.needsUpdate = true;
+      const refresh = () => {
+        aValue.textContent = a.toFixed(1)
+        bValue.textContent = b.toFixed(1)
+        aSlider.value = a
+        bSlider.value = b
+        const bText = b < 0 ? `+ ${Math.abs(b).toFixed(1)}/x` : `- ${b.toFixed(1)}/x`
+        formulaBox.textContent = `f(x) = ${a.toFixed(1)}*x ${bText}`
+        buildCurve()
+        syncThumb(aGroup, a)
+        syncThumb(bGroup, b)
+      }
+
+      aSlider.addEventListener('input', () => { a = parseFloat(aSlider.value); refresh() })
+      bSlider.addEventListener('input', () => { b = parseFloat(bSlider.value); refresh() })
+
+      const sliderDrag = { param: null, group: null, startX: 0, startValue: 0 }
+      const drag = attachDrag([axes, aGroup, bGroup], {
+        onHit: (hit) => {
+          const n = hit.object.name
+          if (n.startsWith('a')) {
+            sliderDrag.param = 'a'; sliderDrag.group = aGroup; sliderDrag.startX = hit.point.x; sliderDrag.startValue = a
+            return { mode: 'slider' }
+          }
+          if (n.startsWith('b')) {
+            sliderDrag.param = 'b'; sliderDrag.group = bGroup; sliderDrag.startX = hit.point.x; sliderDrag.startValue = b
+            return { mode: 'slider' }
+          }
+          return undefined
         }
+      })
+
+      const rayM = new THREE.Matrix4()
+      const ray = new THREE.Raycaster()
+      const sliderRayX = (controller, group) => {
+        rayM.identity().extractRotation(controller.matrixWorld)
+        ray.ray.origin.setFromMatrixPosition(controller.matrixWorld)
+        ray.ray.direction.set(0, 0, -1).applyMatrix4(rayM)
+        const hits = ray.intersectObjects(group.children, true)
+        return hits.length ? hits[0].point.x : null
       }
 
-      function createAxes() {
-        const material = new THREE.MeshStandardMaterial({ color: 0x88c8ff, roughness: 0.3, metalness: 0.2 });
-        const length = 3.0;
-        const thickness = 0.03;
+      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton')])
 
-        const xAxis = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), material);
-        xAxis.rotation.z = -Math.PI / 2;
-        xAxis.position.x = length / 2;
-        axesGroup.add(xAxis);
+      refresh()
 
-        const yAxis = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), material);
-        yAxis.position.y = length / 2;
-        axesGroup.add(yAxis);
-
-        const zAxis = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), material);
-        zAxis.rotation.x = Math.PI / 2;
-        zAxis.position.z = length / 2;
-        axesGroup.add(zAxis);
-
-        const arrow = new THREE.ConeGeometry(0.08, 0.26, 16);
-        const xArrow = new THREE.Mesh(arrow, material);
-        xArrow.rotation.z = -Math.PI / 2;
-        xArrow.position.set(length, 0, 0);
-        axesGroup.add(xArrow);
-
-        const yArrow = new THREE.Mesh(arrow, material);
-        yArrow.position.set(0, length, 0);
-        axesGroup.add(yArrow);
-
-        const zArrow = new THREE.Mesh(arrow, material);
-        zArrow.rotation.x = Math.PI / 2;
-        zArrow.position.set(0, 0, length);
-        axesGroup.add(zArrow);
-
-        axesGroup.add(createLabel('X', length + 0.2, 0, 0));
-        axesGroup.add(createLabel('Y', 0, length + 0.2, 0));
-        axesGroup.add(createLabel('Z', 0, 0, length + 0.2));
-      }
-
-      function createLabel(text, x, y, z) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 128;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(5, 9, 24, 0.0)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = 'bold 70px system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#ccf6ff';
-        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.encoding = THREE.sRGBEncoding;
-
-        const label = new THREE.Mesh(
-          new THREE.PlaneGeometry(0.4, 0.2),
-          new THREE.MeshBasicMaterial({ map: texture, transparent: true })
-        );
-        label.position.set(x, y, z);
-        label.lookAt(camera.position);
-        return label;
-      }
-
-      function createFormulaLabel(a, b) {
-        const bText = b < 0 ? `+ ${Math.abs(b).toFixed(1)}/x` : `- ${b.toFixed(1)}/x`;
-        const text = `f(x) = ${a.toFixed(1)}*x ${bText}`;
-        const canvas = document.createElement('canvas');
-        canvas.width = 1024;
-        canvas.height = 256;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'rgba(5, 9, 24, 0.0)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = 'bold 80px system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#dbe8ff';
-        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.encoding = THREE.sRGBEncoding;
-
-        const label = new THREE.Mesh(
-          new THREE.PlaneGeometry(2.5, 0.6),
-          new THREE.MeshBasicMaterial({ map: texture, transparent: true })
-        );
-        label.position.set(0, 2.5, -0.5);
-        label.lookAt(camera.position);
-        axesGroup.add(label);
-        return label;
-      }
-
-      function createVRSlider(name) {
-        const group = new THREE.Group();
-
-        const trackGeometry = new THREE.BoxGeometry(6.28, 0.06, 0.06);
-        const trackMaterial = new THREE.MeshStandardMaterial({ color: 0x1a3a5c, roughness: 0.8, metalness: 0.2 });
-        const track = new THREE.Mesh(trackGeometry, trackMaterial);
-        track.name = name + '_track';
-        group.add(track);
-
-        const thumbGeometry = new THREE.BoxGeometry(0.2, 0.15, 0.15);
-        const thumbMaterial = new THREE.MeshStandardMaterial({ color: 0x88c8ff, roughness: 0.3, metalness: 0.6, emissive: 0x44a0ff, emissiveIntensity: 0.3 });
-        const thumb = new THREE.Mesh(thumbGeometry, thumbMaterial);
-        thumb.name = name + '_thumb';
-        thumb.position.x = 0;
-        group.add(thumb);
-
-        return group;
-      }
-
-      function createFxCurve(a, b) {
-        const points = [];
-        const start = -Math.PI * 4;
-        const end = Math.PI * 4;
-        const step = 0.08;
-        for (let x = start; x <= end; x += step) {
-          const y = Math.abs(x) < 1e-4 ? 0 : a * x - b / x;
-          points.push(new THREE.Vector3(x * 0.28, y * 0.7, 0));
-        }
-
-        const curveGeometry = new THREE.BufferGeometry().setFromPoints(points);
-        const curveMaterial = new THREE.LineBasicMaterial({ color: 0xffd568, linewidth: 2 });
-        const curve = new THREE.Line(curveGeometry, curveMaterial);
-        curve.position.y = 0.02;
-        axesGroup.add(curve);
-        return curve;
-      }
-
-      function createController(index) {
-        const controller = renderer.xr.getController(index);
-        controller.addEventListener('selectstart', onSelectStart);
-        controller.addEventListener('selectend', onSelectEnd);
-
-        const ray = new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)]),
-          new THREE.LineBasicMaterial({ color: 0x88c8ff })
-        );
-        ray.name = 'ray';
-        ray.scale.z = 6;
-        controller.add(ray);
-
-        const pointer = new THREE.Mesh(
-          new THREE.SphereGeometry(0.015, 16, 12),
-          new THREE.MeshBasicMaterial({ color: 0x88c8ff, opacity: 0.9, transparent: true })
-        );
-        pointer.position.set(0, 0, -1);
-        controller.add(pointer);
-
-        return controller;
-      }
-
-      function onSelectStart(event) {
-        const controller = event.target;
-        const intersections = getControllerIntersections(controller);
-        if (intersections.length) {
-          const hitObject = intersections[0].object;
-          if (hitObject.name === 'a_thumb' || hitObject.name === 'a_track') {
-            selectedMode = 'slider_a';
-            selectedController = controller;
-            sliderStartX = intersections[0].point.x;
-            sliderStartValue = a;
-          } else if (hitObject.name === 'b_thumb' || hitObject.name === 'b_track') {
-            selectedMode = 'slider_b';
-            selectedController = controller;
-            sliderStartX = intersections[0].point.x;
-            sliderStartValue = b;
-          } else {
-            selectedMode = 'transform';
-            selectedController = controller;
-            controllerStartQuat.copy(controller.quaternion);
-            axesStartQuat.copy(axesGroup.quaternion);
-            controllerStartPos.setFromMatrixPosition(controller.matrixWorld);
-            axesStartPos.copy(axesGroup.position);
+      startLoop(() => {
+        drag.updateDrag()
+        if (drag.getMode() === 'slider' && drag.getSelected() && sliderDrag.group) {
+          const x = sliderRayX(drag.getSelected(), sliderDrag.group)
+          if (x !== null) {
+            const { min, max } = sliderDrag.group.userData
+            const delta = (x - sliderDrag.startX) / TRACK_LEN
+            const value = Math.max(min, Math.min(max, sliderDrag.startValue + delta * (max - min)))
+            if (sliderDrag.param === 'a') a = value
+            else b = value
+            refresh()
           }
         }
-      }
-
-      function onSelectEnd() {
-        selectedController = null;
-        selectedMode = null;
-      }
-
-      function getControllerIntersections(controller) {
-        tempMatrix.identity().extractRotation(controller.matrixWorld);
-        raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-        raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-        return raycaster.intersectObjects(aSliderGroup.children, true).concat(
-          raycaster.intersectObjects(bSliderGroup.children, true),
-          raycaster.intersectObjects(axesGroup.children, true)
-        );
-      }
-
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
-
-      function render() {
-        if (selectedController && selectedMode === 'transform') {
-          const currentQuat = selectedController.quaternion.clone();
-          const deltaQuat = currentQuat.multiply(controllerStartQuat.clone().invert());
-          axesGroup.quaternion.copy(axesStartQuat).premultiply(deltaQuat);
-
-          const currentPos = new THREE.Vector3().setFromMatrixPosition(selectedController.matrixWorld);
-          const deltaPos = currentPos.clone().sub(controllerStartPos);
-          axesGroup.position.copy(axesStartPos).add(deltaPos);
-        } else if (selectedController && (selectedMode === 'slider_a' || selectedMode === 'slider_b')) {
-          tempMatrix.identity().extractRotation(selectedController.matrixWorld);
-          raycaster.ray.origin.setFromMatrixPosition(selectedController.matrixWorld);
-          raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-          const sliderIntersections = selectedMode === 'slider_a' ?
-            raycaster.intersectObjects(aSliderGroup.children, true) :
-            raycaster.intersectObjects(bSliderGroup.children, true);
-          if (sliderIntersections.length) {
-            const currentX = sliderIntersections[0].point.x;
-            const deltaX = currentX - sliderStartX;
-            const minX = -3.14;
-            const maxX = 3.14;
-            const trackLength = maxX - minX;
-            const normalizedDelta = deltaX / trackLength;
-            let minVal, maxVal, value;
-            if (selectedMode === 'slider_a') {
-              minVal = -5;
-              maxVal = 5;
-              value = sliderStartValue + normalizedDelta * (maxVal - minVal);
-              value = Math.max(minVal, Math.min(maxVal, value));
-              a = value;
-              aSlider.value = a;
-              aValue.textContent = a.toFixed(1);
-            } else {
-              minVal = 0.1;
-              maxVal = 10;
-              value = sliderStartValue + normalizedDelta * (maxVal - minVal);
-              value = Math.max(minVal, Math.min(maxVal, value));
-              b = value;
-              bSlider.value = b;
-              bValue.textContent = b.toFixed(1);
-            }
-            updateFxCurve();
-            updateFormulaBox();
-            updateSliderThumb(selectedMode === 'slider_a' ? 'a' : 'b', value);
-          }
-        }
-        if (formulaMesh) {
-          formulaMesh.lookAt(camera.position);
-        }
-        renderer.render(scene, camera);
-      }
+      })
     </script>
   </body>
 </html>

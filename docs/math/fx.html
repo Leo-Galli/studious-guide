@@ -1,17 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>f(x) XR</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css">
-</head>
+    <link rel="stylesheet" href="/assets/xr-hud.css" />
+  </head>
   <body>
+    <a id="backButton" href="index.html">Torna a Matematica</a>
 
     <div id="panel">
       <div class="panel-inner">
         <div class="ph">
-          <div class="ph-left"><span class="ph-title">f(x) Explorer XR</span><br><span class="ph-sub">Made with <3 by Leonardo Galli</span></div>
+          <div>
+            <div class="ph-title">f(x) Explorer XR</div>
+            <div class="ph-sub">Made with &lt;3 by Leonardo Galli</div>
+          </div>
         </div>
 
         <div class="sec-label">Formula</div>
@@ -29,387 +33,196 @@
           <span class="ex-chip" data-fx="A*sin(B*x)">A·sin(B·x)</span>
           <span class="ex-chip" data-fx="A*x^2 + B">A·x²+B</span>
           <span class="ex-chip" data-fx="sin(A*x)/x">sin(A·x)/x</span>
+          <span class="ex-chip" data-fx="A*sqrt(abs(x)) - B">A·√|x|−B</span>
         </div>
 
         <div class="div"></div>
         <div class="sec-label">Parametri Dinamici</div>
-        <div class="sr"><span class="sn a">A</span><input type="range" id="aSlider" min="-10" max="10" step="0.1" value="1" /><span class="sv" id="aValue">1.0</span></div>
-        <div class="sr"><span class="sn b">B</span><input type="range" id="bSlider" min="-10" max="10" step="0.1" value="1" /><span class="sv" id="bValue">1.0</span></div>
+        <div class="sr"><span class="sn">A</span><input type="range" id="aSlider" min="-10" max="10" step="0.1" value="1" /><span class="sv" id="aValue">1.0</span></div>
+        <div class="sr"><span class="sn">B</span><input type="range" id="bSlider" min="-10" max="10" step="0.1" value="1" /><span class="sv" id="bValue">1.0</span></div>
 
-        <div class="div"></div>
-        <div class="sec-label">Istruzioni Interazione VR</div>
+        <div class="sec-label">Controlli</div>
         <div class="info-vr">
-          • <strong>Volare / Spostarsi</strong>: Muovi gli analogici. Le mani ti seguiranno a specchio.<br>
-          • <strong>Sposta Menu / Assi</strong>: Punta il raggio laser, tieni premuto il grilletto e trascina.<br>
-          • <strong>Laser Intelligente</strong>: Diventa verde quando interseca un elemento agganciabile.
+          Desktop: WASD/frecce per muoverti, QE su/giu, R reset vista.<br />
+          VR: stick sinistro muove, stick destro ruota e sale/scende.<br />
+          Grilletto: punta gli assi per ruotarli/spostarli, oppure i cursori VR A e B.
         </div>
+
+        <div class="credit" id="creditBox"></div>
       </div>
     </div>
 
     <script type="module">
-      import * as THREE from '/vendor/three/build/three.module.js';
-      import { VRButton } from '/vendor/three/examples/jsm/webxr/VRButton.js';
+      import { createXrShell, makeAxes, makeTube, creditLine } from '/assets/xr-kit.js'
 
-      /* ══ DEFAULT POSITIONS FOR RESET ══════════════════════ */
-      const DEFAULT_AXES_POS = new THREE.Vector3(0, 1.25, -0.5);
-      const DEFAULT_MENU_POS = new THREE.Vector3(-1.1, 1.35, -0.5);
-      const DEFAULT_MENU_ROT = new THREE.Euler(0, 0.35, 0);
+      const { THREE, scene, resetView, startLoop, hideHudInVr, attachDrag } = createXrShell()
 
-      /* ══ RENDERER & SCENE ═════════════════════════════════ */
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.xr.enabled = true;
-      renderer.xr.setReferenceSpaceType('local');
-      document.body.appendChild(renderer.domElement);
-      document.body.appendChild(VRButton.createButton(renderer));
+      const axes = makeAxes(THREE, { length: 3.0 })
+      axes.position.set(0, 1.25, -0.5)
+      axes.scale.setScalar(0.75)
+      scene.add(axes)
 
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x02050a);
+      const TRACK_LEN = 1.4
+      const TRACK_HALF = TRACK_LEN / 2
 
-      /* CAMERA RIG: Contiene la camera E i controller in modo che si muovano allineati */
-      const cameraRig = new THREE.Group();
-      scene.add(cameraRig);
-      
-      const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.05, 100);
-      camera.position.set(0, 1.7, 3.8);
-      cameraRig.add(camera);
-
-      scene.add(new THREE.HemisphereLight(0xaaccff, 0x081020, 0.9));
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(4, 8, 4);
-      scene.add(dirLight);
-
-      /* Ambiente base scuro */
-      const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0x040914, roughness: 0.93 }));
-      floor.rotation.x = -Math.PI / 2; scene.add(floor);
-      const grid = new THREE.GridHelper(14, 28, 0x142847, 0x061124); grid.position.y = 0.001; scene.add(grid);
-
-      /* ══ STATE MANAGEMENT ═════════════════════════════════ */
-      let paramA = 1, paramB = 1;
-      let fxExpr = '2*x - 1/x';
-      let fxCurve = null;
-      let currentDragTarget = null; 
-
-      const axesGroup = new THREE.Group();
-      axesGroup.position.copy(DEFAULT_AXES_POS);
-      axesGroup.scale.setScalar(0.75);
-      scene.add(axesGroup);
-
-      /* ══ INTERFACCIA VR CANVAS (512x512) ═══════ */
-      let vrUiMesh;
-      const vrUiCanvas = document.createElement('canvas'); vrUiCanvas.width = 512; vrUiCanvas.height = 512;
-      const vrUiCtx = vrUiCanvas.getContext('2d');
-      const vrUiTexture = new THREE.CanvasTexture(vrUiCanvas);
-
-      const hitBoxes = {
-        sliderA:  { x: 40, y: 100, w: 432, h: 35, min: -10, max: 10, type: 'slider', key: 'A' },
-        sliderB:  { x: 40, y: 170, w: 432, h: 35, min: -10, max: 10, type: 'slider', key: 'B' },
-        fChip1:   { x: 40,  y: 230, w: 132, h: 38, type: 'formula', fx: 'A*sin(B*x)' },
-        fChip2:   { x: 190, y: 230, w: 132, h: 38, type: 'formula', fx: 'A*x^2 + B' },
-        fChip3:   { x: 340, y: 230, w: 132, h: 38, type: 'formula', fx: 'sin(A*x)/x' },
-        resetBtn: { x: 40,  y: 290, w: 432, h: 40, type: 'reset' }
-      };
-
-      function drawVrUi() {
-        vrUiCtx.fillStyle = '#040914'; vrUiCtx.fillRect(0, 0, 512, 512);
-        vrUiCtx.strokeStyle = '#0066cc'; vrUiCtx.lineWidth = 4; vrUiCtx.strokeRect(2, 2, 508, 508);
-
-        // Header
-        vrUiCtx.fillStyle = '#7dd6ff'; vrUiCtx.font = 'bold 24px monospace';
-        vrUiCtx.fillText(`f(x) = ${fxExpr}`, 40, 50);
-        vrUiCtx.fillStyle = 'rgba(0, 170, 255, 0.2)'; vrUiCtx.fillRect(40, 68, 432, 2);
-
-        // Sliders
-        vrUiCtx.fillStyle = '#5ae4ff'; vrUiCtx.font = '15px monospace'; vrUiCtx.fillText(`Parametro A: ${paramA.toFixed(1)}`, 40, 95);
-        drawCanvasSlider(hitBoxes.sliderA, paramA, '#5ae4ff');
-
-        vrUiCtx.fillStyle = '#ff7aac'; vrUiCtx.fillText(`Parametro B: ${paramB.toFixed(1)}`, 40, 165);
-        drawCanvasSlider(hitBoxes.sliderB, paramB, '#ff7aac');
-
-        // Chips
-        drawCanvasChip(hitBoxes.fChip1, 'A·sin(B·x)');
-        drawCanvasChip(hitBoxes.fChip2, 'A·x²+B');
-        drawCanvasChip(hitBoxes.fChip3, 'sin(A·x)/x');
-
-        // Reset Button VR
-        vrUiCtx.fillStyle = 'rgba(255, 74, 116, 0.1)'; vrUiCtx.fillRect(hitBoxes.resetBtn.x, hitBoxes.resetBtn.y, hitBoxes.resetBtn.w, hitBoxes.resetBtn.h);
-        vrUiCtx.strokeStyle = 'rgba(255, 74, 116, 0.5)'; vrUiCtx.strokeRect(hitBoxes.resetBtn.x, hitBoxes.resetBtn.y, hitBoxes.resetBtn.w, hitBoxes.resetBtn.h);
-        vrUiCtx.fillStyle = '#ff7aac'; vrUiCtx.font = 'bold 15px monospace'; vrUiCtx.fillText('RESET VIEW / RE-CENTER', 160, 315);
-
-        // Area Info
-        vrUiCtx.fillStyle = 'rgba(255,255,255,0.02)'; vrUiCtx.fillRect(40, 355, 432, 115);
-        vrUiCtx.strokeStyle = 'rgba(80, 170, 255, 0.1)'; vrUiCtx.strokeRect(40, 355, 432, 115);
-        vrUiCtx.fillStyle = '#a2cfff'; vrUiCtx.font = '11px monospace';
-        vrUiCtx.fillText('-> Le mani rimangono sincronizzate durante il volo.', 55, 385);
-        vrUiCtx.fillText('-> Il raggio diventa verde sulle aree afferrabili.', 55, 415);
-        vrUiCtx.fillText('-> Usa gli stick analogici per muoverti liberamente.', 55, 445);
-
-        vrUiTexture.needsUpdate = true;
+      const makeSlider = (name, min, max) => {
+        const group = new THREE.Group()
+        const track = new THREE.Mesh(
+          new THREE.BoxGeometry(TRACK_LEN, 0.04, 0.04),
+          new THREE.MeshStandardMaterial({ color: 0x2c3642, roughness: 0.8, metalness: 0.2 })
+        )
+        track.name = name + 'Track'
+        group.add(track)
+        const thumb = new THREE.Mesh(
+          new THREE.BoxGeometry(0.12, 0.12, 0.12),
+          new THREE.MeshStandardMaterial({ color: 0xc8f542, emissive: 0xc8f542, emissiveIntensity: 0.3, roughness: 0.3, metalness: 0.5 })
+        )
+        thumb.name = name + 'Thumb'
+        group.add(thumb)
+        group.userData = { min, max }
+        return group
       }
 
-      function drawCanvasSlider(box, val, color) {
-        vrUiCtx.fillStyle = 'rgba(20,45,90,0.5)'; vrUiCtx.fillRect(box.x, box.y + 14, box.w, 6);
-        const pct = (val - box.min) / (box.max - box.min);
-        vrUiCtx.fillStyle = color; vrUiCtx.fillRect(box.x, box.y + 14, box.w * pct, 6);
-        vrUiCtx.fillStyle = '#ffffff'; vrUiCtx.beginPath(); vrUiCtx.arc(box.x + (box.w * pct), box.y + 17, 8, 0, Math.PI * 2); vrUiCtx.fill();
+      const aGroup = makeSlider('a', -10, 10)
+      aGroup.position.set(0, 1.0, -1.3)
+      scene.add(aGroup)
+      const bGroup = makeSlider('b', -10, 10)
+      bGroup.position.set(0, 0.55, -1.3)
+      scene.add(bGroup)
+
+      let paramA = 1
+      let paramB = 1
+      let fxExpr = '2*x - 1/x'
+      let curve = null
+
+      const fxInput = document.getElementById('fxInput')
+      const fxError = document.getElementById('fxError')
+      const aSlider = document.getElementById('aSlider')
+      const bSlider = document.getElementById('bSlider')
+      const aValue = document.getElementById('aValue')
+      const bValue = document.getElementById('bValue')
+      document.getElementById('creditBox').textContent = creditLine('f(x) Explorer · Leonardo Galli')
+
+      // Safe-ish compiler: only whitelisted math tokens survive, everything is
+      // evaluated against explicit x, A, B arguments (no access to outer scope).
+      const buildEval = (expr) => {
+        const allowed = /^[0-9+\-*/().,\sxAB]*$/
+        const mapped = expr
+          .replace(/\^/g, '**')
+          .replace(/\bsin\b/g, 'Math.sin')
+          .replace(/\bcos\b/g, 'Math.cos')
+          .replace(/\btan\b/g, 'Math.tan')
+          .replace(/\babs\b/g, 'Math.abs')
+          .replace(/\bsqrt\b/g, 'Math.sqrt')
+          .replace(/\bpow\b/g, 'Math.pow')
+          .replace(/\blog\b/g, 'Math.log')
+          .replace(/\bexp\b/g, 'Math.exp')
+          .replace(/\bPI\b/g, 'Math.PI')
+          .replace(/\bE\b/g, 'Math.E')
+        const stripped = mapped.replace(/Math\.(sin|cos|tan|abs|sqrt|pow|log|exp|PI|E)/g, '').replace(/\*\*/g, '')
+        if (!allowed.test(stripped)) throw new Error('Caratteri non ammessi')
+        return new Function('x', 'A', 'B', `"use strict"; return (${mapped});`)
       }
 
-      function drawCanvasChip(box, text) {
-        vrUiCtx.fillStyle = 'rgba(0, 130, 255, 0.06)'; vrUiCtx.fillRect(box.x, box.y, box.w, box.h);
-        vrUiCtx.strokeStyle = 'rgba(0, 170, 255, 0.3)'; vrUiCtx.lineWidth = 1; vrUiCtx.strokeRect(box.x, box.y, box.w, box.h);
-        vrUiCtx.fillStyle = '#99ccff'; vrUiCtx.font = '13px monospace'; vrUiCtx.fillText(text, box.x + 10, box.y + 24);
-      }
+      const SCALE_X = 0.3
+      const SCALE_Y = 0.55
 
-      const vrUiGeo = new THREE.PlaneGeometry(1.25, 1.25);
-      const vrUiMat = new THREE.MeshBasicMaterial({ map: vrUiTexture, side: THREE.DoubleSide, transparent: true });
-      vrUiMesh = new THREE.Mesh(vrUiGeo, vrUiMat);
-      vrUiMesh.position.copy(DEFAULT_MENU_POS); vrUiMesh.rotation.copy(DEFAULT_MENU_ROT);
-      scene.add(vrUiMesh);
-
-      /* ══ SYNC CONTROLLI SCHERMO (2D) ═══════════ */
-      const aSlider = document.getElementById('aSlider'); const aValue = document.getElementById('aValue');
-      const bSlider = document.getElementById('bSlider'); const bValue = document.getElementById('bValue');
-
-      function syncSliderBg(el) {
-        const pct = ((parseFloat(el.value) - parseFloat(el.min)) / (parseFloat(el.max) - parseFloat(el.min)) * 100).toFixed(1) + '%';
-        el.style.setProperty('--pct', pct);
-      }
-
-      function resetUniverse() {
-        axesGroup.position.copy(DEFAULT_AXES_POS);
-        vrUiMesh.position.copy(DEFAULT_MENU_POS);
-        vrUiMesh.rotation.copy(DEFAULT_MENU_ROT);
-        cameraRig.position.set(0, 0, 0);
-      }
-
-      function updateAllViews() {
-        aValue.textContent = paramA.toFixed(1); aSlider.value = paramA;
-        bValue.textContent = paramB.toFixed(1); bSlider.value = paramB;
-        syncSliderBg(aSlider); syncSliderBg(bSlider);
-        updateFxCurve();
-        drawVrUi();
-      }
-
-      aSlider.addEventListener('input', e => { paramA = parseFloat(e.target.value); updateAllViews(); });
-      bSlider.addEventListener('input', e => { paramB = parseFloat(e.target.value); updateAllViews(); });
-      document.getElementById('resetBtn').addEventListener('click', resetUniverse);
-
-      document.getElementById('applyBtn').addEventListener('click', () => {
-        fxExpr = document.getElementById('fxInput').value.trim(); updateAllViews();
-      });
-      document.querySelectorAll('.ex-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-          fxExpr = chip.dataset.fx; document.getElementById('fxInput').value = fxExpr; updateAllViews();
-        });
-      });
-
-      /* ══ COMPILATORE MATEMATICO ══════════════ */
-      function buildEval(expr) {
-        const e = expr.replace(/\^/g, '**').replace(/\bsin\b/g, 'Math.sin').replace(/\bcos\b/g, 'Math.cos').replace(/\btan\b/g, 'Math.tan').replace(/\bpi\b/gi, 'Math.PI');
-        return new Function('x', 'A', 'B', `"use strict"; return (${e});`);
-      }
-
-      function updateFxCurve() {
-        if (fxCurve) { axesGroup.remove(fxCurve); }
-        let fn; try { fn = buildEval(fxExpr); } catch(_) { return; }
-        const segments = []; let seg = [];
-        const start = -Math.PI * 4, end = Math.PI * 4, step = 0.05, SCALE_X = 0.3, SCALE_Y = 0.55;
-
-        for (let t = start; t <= end; t += step) {
-          let y = fn(t, paramA, paramB);
-          if (!isFinite(y) || Math.abs(y * SCALE_Y) > 5.0) {
-            if (seg.length > 1) segments.push(seg); seg = [];
-          } else { seg.push(new THREE.Vector3(t * SCALE_X, y * SCALE_Y, 0)); }
+      const buildCurve = () => {
+        let fn
+        try {
+          fn = buildEval(fxExpr)
+          if (!isFinite(fn(1, paramA, paramB)) && !isFinite(fn(2, paramA, paramB))) throw new Error('Funzione non valida')
+          fxError.textContent = ''
+        } catch (err) {
+          fxError.textContent = err.message || 'Formula non valida'
+          return
         }
-        if (seg.length > 1) segments.push(seg);
-
-        fxCurve = new THREE.Group();
-        const mat = new THREE.LineBasicMaterial({ color: 0xffdd33, linewidth: 2.5 });
-        segments.forEach(pts => {
-          const geo = new THREE.BufferGeometry().setFromPoints(pts);
-          fxCurve.add(new THREE.Line(geo, mat));
-        });
-        axesGroup.add(fxCurve);
-      }
-
-      /* ══ GENERAZIONE ASSI CARTESIANI + BOUNDING BOX ══ */
-      createAxes();
-      updateAllViews();
-
-      function createAxes() {
-        const length = 3.0, thickness = 0.022;
-        const mX = new THREE.MeshStandardMaterial({ color: 0x5ae4ff, roughness: 0.3, metalness: 0.2, emissive: 0x1a5070 });
-        const mY = new THREE.MeshStandardMaterial({ color: 0x7affa0, roughness: 0.3, metalness: 0.2, emissive: 0x105030 });
-        const mZ = new THREE.MeshStandardMaterial({ color: 0xff7aac, roughness: 0.3, metalness: 0.2, emissive: 0x501030 });
-
-        const xCyl = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), mX); xCyl.rotation.z = -Math.PI/2; xCyl.position.x = length/2; axesGroup.add(xCyl);
-        const yCyl = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), mY); yCyl.position.y = length/2; axesGroup.add(yCyl);
-        const zCyl = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, length, 12), mZ); zCyl.rotation.x = Math.PI/2; zCyl.position.z = length/2; axesGroup.add(zCyl);
-
-        const coneGeo = new THREE.ConeGeometry(0.065, 0.2, 16);
-        const xArrow = new THREE.Mesh(coneGeo, mX); xArrow.rotation.z = -Math.PI/2; xArrow.position.set(length, 0, 0);
-        const yArrow = new THREE.Mesh(coneGeo, mY); yArrow.position.set(0, length, 0);
-        const zArrow = new THREE.Mesh(coneGeo, mZ); zArrow.rotation.x = Math.PI/2; zArrow.position.set(0, 0, length);
-        axesGroup.add(xArrow, yArrow, zArrow);
-
-        const boxGeo = new THREE.BoxGeometry(length, length, length);
-        const boxMat = new THREE.MeshBasicMaterial({ color: 0x00aaff, wireframe: true, transparent: true, opacity: 0.04 });
-        const boundingBoxMesh = new THREE.Mesh(boxGeo, boxMat);
-        boundingBoxMesh.position.set(length/2, length/2, length/2);
-        axesGroup.add(boundingBoxMesh);
-      }
-
-      /* ══ LOGICA CONTROLLER ANCORATI AL CAMERA RIG ═════════ */
-      const controllers = [renderer.xr.getController(0), renderer.xr.getController(1)];
-      controllers.forEach((c) => {
-        // AGGANCIO AL RIG: Invece di aggiungerli direttamente alla scena, li aggiungiamo al rig
-        // In questo modo, quando il rig si sposta tramite analogici, le mani si muovono allineate alla camera
-        cameraRig.add(c);
-        c.addEventListener('selectstart', onSelectStart);
-        c.addEventListener('selectend', onSelectEnd);
-        
-        const rayGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-1)]);
-        const rayMat = new THREE.LineBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.5 });
-        const ray = new THREE.Line(rayGeo, rayMat); ray.scale.z = 8; c.add(ray);
-      });
-
-      const raycaster = new THREE.Raycaster();
-      const tempMatrix = new THREE.Matrix4();
-      let selectedController = null;
-      let activeBox = null;
-      let initialObjectOffset = new THREE.Vector3();
-
-      function onSelectStart(event) {
-        const controller = event.target;
-        tempMatrix.identity().extractRotation(controller.matrixWorld);
-        raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-        raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-        const axesHits = raycaster.intersectObject(axesGroup, true);
-        if (axesHits.length > 0) {
-          selectedController = controller;
-          currentDragTarget = 'axes';
-          initialObjectOffset.copy(axesGroup.position).sub(axesHits[0].point);
-          return;
-        }
-
-        const uiHits = raycaster.intersectObject(vrUiMesh);
-        if (uiHits.length > 0) {
-          const uv = uiHits[0].uv;
-          const cx = uv.x * 512; const cy = (1 - uv.y) * 512;
-          let hitInteractive = false;
-
-          for (const key in hitBoxes) {
-            const box = hitBoxes[key];
-            if (cx >= box.x && cx <= box.x + box.w && cy >= box.y && cy <= box.y + box.h) {
-              selectedController = controller; 
-              activeBox = box;
-              currentDragTarget = (box.type === 'slider') ? 'slider' : 'click';
-              handleVrInteraction(cx);
-              hitInteractive = true;
-              break;
-            }
+        const segments = []
+        let seg = []
+        for (let t = -Math.PI * 4; t <= Math.PI * 4; t += 0.05) {
+          const y = fn(t, paramA, paramB) * SCALE_Y
+          if (!isFinite(y) || Math.abs(y) > 5) {
+            if (seg.length > 1) segments.push(seg)
+            seg = []
+            continue
           }
+          seg.push(new THREE.Vector3(t * SCALE_X, y, 0))
+        }
+        if (seg.length > 1) segments.push(seg)
+        if (curve) axes.remove(curve)
+        curve = makeTube(THREE, segments, { radius: 0.035 })
+        axes.add(curve)
+      }
 
-          if (!hitInteractive) {
-            selectedController = controller;
-            currentDragTarget = 'menu';
-            initialObjectOffset.copy(vrUiMesh.position).sub(uiHits[0].point);
+      const syncThumb = (group, value) => {
+        const { min, max } = group.userData
+        const norm = (value - min) / (max - min)
+        group.children[1].position.x = -TRACK_HALF + norm * TRACK_LEN
+      }
+
+      const refresh = () => {
+        aValue.textContent = paramA.toFixed(1)
+        bValue.textContent = paramB.toFixed(1)
+        aSlider.value = paramA
+        bSlider.value = paramB
+        buildCurve()
+        syncThumb(aGroup, paramA)
+        syncThumb(bGroup, paramB)
+      }
+
+      aSlider.addEventListener('input', () => { paramA = parseFloat(aSlider.value); refresh() })
+      bSlider.addEventListener('input', () => { paramB = parseFloat(bSlider.value); refresh() })
+      document.getElementById('applyBtn').addEventListener('click', () => { fxExpr = fxInput.value.trim(); refresh() })
+      fxInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { fxExpr = fxInput.value.trim(); refresh() } })
+      document.getElementById('resetBtn').addEventListener('click', resetView)
+      document.querySelectorAll('.ex-chip').forEach((chip) => {
+        chip.addEventListener('click', () => { fxExpr = chip.dataset.fx; fxInput.value = fxExpr; refresh() })
+      })
+
+      const sliderDrag = { param: null, group: null, startX: 0, startValue: 0 }
+      const drag = attachDrag([axes, aGroup, bGroup], {
+        onHit: (hit) => {
+          const n = hit.object.name
+          if (n.startsWith('a')) {
+            sliderDrag.param = 'a'; sliderDrag.group = aGroup; sliderDrag.startX = hit.point.x; sliderDrag.startValue = paramA
+            return { mode: 'slider' }
+          }
+          if (n.startsWith('b')) {
+            sliderDrag.param = 'b'; sliderDrag.group = bGroup; sliderDrag.startX = hit.point.x; sliderDrag.startValue = paramB
+            return { mode: 'slider' }
+          }
+          return undefined
+        }
+      })
+
+      const rayM = new THREE.Matrix4()
+      const ray = new THREE.Raycaster()
+      const sliderRayX = (controller, group) => {
+        rayM.identity().extractRotation(controller.matrixWorld)
+        ray.ray.origin.setFromMatrixPosition(controller.matrixWorld)
+        ray.ray.direction.set(0, 0, -1).applyMatrix4(rayM)
+        const hits = ray.intersectObjects(group.children, true)
+        return hits.length ? hits[0].point.x : null
+      }
+
+      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton')])
+
+      refresh()
+
+      startLoop(() => {
+        drag.updateDrag()
+        if (drag.getMode() === 'slider' && drag.getSelected() && sliderDrag.group) {
+          const x = sliderRayX(drag.getSelected(), sliderDrag.group)
+          if (x !== null) {
+            const { min, max } = sliderDrag.group.userData
+            const delta = (x - sliderDrag.startX) / TRACK_LEN
+            const value = Math.max(min, Math.min(max, sliderDrag.startValue + delta * (max - min)))
+            if (sliderDrag.param === 'a') paramA = value
+            else paramB = value
+            refresh()
           }
         }
-      }
-
-      function onSelectEnd() { 
-        selectedController = null; 
-        activeBox = null; 
-        currentDragTarget = null;
-      }
-
-      function handleVrInteraction(canvasX) {
-        if (!activeBox) return;
-
-        if (activeBox.type === 'slider') {
-          const pct = Math.max(0, Math.min(1, (canvasX - activeBox.x) / activeBox.w));
-          const val = activeBox.min + pct * (activeBox.max - activeBox.min);
-          if (activeBox.key === 'A') paramA = val;
-          if (activeBox.key === 'B') paramB = val;
-          updateAllViews();
-        } 
-        else if (activeBox.type === 'formula') {
-          fxExpr = activeBox.fx;
-          document.getElementById('fxInput').value = fxExpr;
-          updateAllViews();
-        }
-        else if (activeBox.type === 'reset') {
-          resetUniverse();
-          updateAllViews();
-        }
-      }
-
-      /* ══ GESTIONE ANALOGICI VR (FLIGHT SYSTEM WITH SYNCED HANDS) ════ */
-      const CAM_STICK_SPEED = 0.05;
-      
-      function processGamepadInputs() {
-        const session = renderer.xr.getSession();
-        if (!session) return;
-
-        for (const source of session.inputSources) {
-          if (source.gamepad && source.gamepad.axes) {
-            const axes = source.gamepad.axes;
-            if (axes.length >= 4) {
-              const stickX = axes[2]; const stickY = axes[3];
-              if (Math.abs(stickX) > 0.1) cameraRig.position.x += stickX * CAM_STICK_SPEED;
-              if (Math.abs(stickY) > 0.1) {
-                if (source.handedness === 'right') cameraRig.position.z += stickY * CAM_STICK_SPEED; 
-                else cameraRig.position.y -= stickY * CAM_STICK_SPEED;
-              }
-            }
-          }
-        }
-      }
-
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-
-      /* ══ RENDERING & ANIMATION LOOP ═══════════════════════ */
-      renderer.setAnimationLoop(() => {
-        processGamepadInputs();
-
-        // Ricalcola lo stato dei puntatori laser ad ogni frame
-        controllers.forEach(c => {
-          tempMatrix.identity().extractRotation(c.matrixWorld);
-          raycaster.ray.origin.setFromMatrixPosition(c.matrixWorld);
-          raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-          
-          const hasHit = raycaster.intersectObject(axesGroup, true).length > 0 || raycaster.intersectObject(vrUiMesh).length > 0;
-          const rayLine = c.children[0];
-          if (rayLine) rayLine.material.color.setHex(hasHit ? 0x00ff88 : 0x00aaff);
-        });
-
-        if (selectedController && currentDragTarget) {
-          tempMatrix.identity().extractRotation(selectedController.matrixWorld);
-          raycaster.ray.origin.setFromMatrixPosition(selectedController.matrixWorld);
-          raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-          if (currentDragTarget === 'menu') {
-            const targetPos = new THREE.Vector3().copy(raycaster.ray.origin).addScaledVector(raycaster.ray.direction, 1.4).add(initialObjectOffset);
-            vrUiMesh.position.copy(targetPos);
-          } 
-          else if (currentDragTarget === 'axes') {
-            const targetPos = new THREE.Vector3().copy(raycaster.ray.origin).addScaledVector(raycaster.ray.direction, 1.6).add(initialObjectOffset);
-            axesGroup.position.copy(targetPos);
-          } 
-          else if (currentDragTarget === 'slider' && activeBox && activeBox.type === 'slider') {
-            const intersects = raycaster.intersectObject(vrUiMesh);
-            if (intersects.length > 0) { handleVrInteraction(intersects[0].uv.x * 512); }
-          }
-        }
-        
-        renderer.render(scene, camera);
-      });
+      })
     </script>
   </body>
 </html>

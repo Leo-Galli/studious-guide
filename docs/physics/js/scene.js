@@ -14,8 +14,8 @@ export function initScene(canvas) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1a1a2e);
-  scene.fog = new THREE.Fog(0x1a1a2e, 15, 30);
+  scene.background = new THREE.Color(0x0b0f14);
+  scene.fog = new THREE.Fog(0x0b0f14, 15, 30);
 
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(5, 4, 7);

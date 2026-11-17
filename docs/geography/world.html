@@ -7,8 +7,9 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: "IBM Plex Sans", system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: #0b0f14;
+      color: #ece8e1;
       overflow: hidden;
       height: 100vh;
     }
@@ -21,10 +22,9 @@
       position: absolute;
       top: 20px;
       left: 20px;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(22, 29, 38, 0.96);
+      border: 1px solid rgba(236, 232, 225, 0.14);
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       max-width: 350px;
       font-size: 14px;
       z-index: 10;
@@ -32,17 +32,17 @@
     #info h1 {
       font-size: 24px;
       margin-bottom: 10px;
-      color: #1a1a2e;
+      color: #ece8e1;
     }
     #info p {
-      color: #555;
+      color: #9aa3ad;
       line-height: 1.6;
       margin-bottom: 8px;
     }
     #countryName {
       font-size: 18px;
       font-weight: bold;
-      color: #6366f1;
+      color: #c8f542;
       margin-top: 10px;
       min-height: 30px;
     }
@@ -50,23 +50,48 @@
       position: absolute;
       bottom: 20px;
       left: 20px;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(22, 29, 38, 0.96);
+      border: 1px solid rgba(236, 232, 225, 0.14);
       padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       font-size: 13px;
       z-index: 10;
       max-width: 300px;
     }
     #controls h3 {
-      color: #1a1a2e;
+      color: #ece8e1;
       margin-bottom: 8px;
       font-size: 14px;
     }
     #controls ul {
       list-style: none;
-      color: #555;
+      color: #9aa3ad;
       line-height: 1.8;
+    }
+    #controls .credit {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(236, 232, 225, 0.14);
+      color: #9aa3ad;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    #indexLink {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 12;
+      padding: 10px 16px;
+      border: 1px solid rgba(236, 232, 225, 0.14);
+      background: rgba(22, 29, 38, 0.96);
+      color: #ece8e1;
+      font: 600 13px "IBM Plex Sans", system-ui, sans-serif;
+      text-decoration: none;
+    }
+    #indexLink:hover,
+    #indexLink:focus-visible {
+      border-color: #c8f542;
+      color: #c8f542;
+      outline: none;
     }
     #controls li {
       margin-bottom: 4px;
@@ -75,10 +100,9 @@
       position: absolute;
       top: 20px;
       left: 20px;
-      background: rgba(255, 255, 255, 0.97);
+      background: rgba(22, 29, 38, 0.97);
+      border: 1px solid rgba(236, 232, 225, 0.14);
       padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
       z-index: 20;
       max-width: 520px;
       display: none;
@@ -98,9 +122,7 @@
       width: 100px;
       height: 64px;
       object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(236, 232, 225, 0.2);
     }
     #countryCard .country-details {
       flex: 1;
@@ -111,11 +133,11 @@
     #countryCard .country-details h2 {
       font-size: 18px;
       margin: 0;
-      color: #1a1a2e;
+      color: #ece8e1;
     }
     #countryCard .country-details p {
       margin: 0;
-      color: #4b5563;
+      color: #9aa3ad;
       font-size: 14px;
       line-height: 1.5;
     }
@@ -126,24 +148,24 @@
     #countryCard .country-details .country-stats div {
       display: flex;
       justify-content: space-between;
-      color: #374151;
+      color: #9aa3ad;
       font-size: 13px;
     }
     #countryCard .country-details .country-stats div span:last-child {
       font-weight: 700;
-      color: #111827;
+      color: #ece8e1;
     }
     #countryBorders {
       font-size: 13px;
       line-height: 1.5;
-      color: #374151;
+      color: #9aa3ad;
       margin-top: 10px;
       white-space: pre-wrap;
     }
     #countryBorders strong {
       display: inline-block;
       margin-bottom: 6px;
-      color: #111827;
+      color: #ece8e1;
     }
     #countryClose {
       position: absolute;
@@ -151,27 +173,25 @@
       right: 10px;
       width: 30px;
       height: 30px;
-      border: none;
-      border-radius: 50%;
-      background: #ef4444;
-      color: white;
+      border: 1px solid rgba(236, 232, 225, 0.14);
+      background: transparent;
+      color: #e2a38a;
       font-size: 18px;
       line-height: 1;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
     }
     #countryClose:hover {
-      background: #dc2626;
+      border-color: #e2a38a;
+      color: #ece8e1;
     }
     #loading {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(22, 29, 38, 0.96);
+      border: 1px solid rgba(236, 232, 225, 0.14);
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       text-align: center;
       z-index: 100;
     }
@@ -180,54 +200,46 @@
       top: 20px;
       right: 20px;
       padding: 12px 24px;
-      background: #6366f1;
-      color: white;
-      border: none;
-      border-radius: 8px;
+      background: #c8f542;
+      color: #0b0f14;
+      border: 1px solid #c8f542;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       display: none;
       z-index: 10;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
     #backButton:hover {
-      background: #4f46e5;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+      background: #e8ff8a;
     }
     #exitVrBtn {
       position: absolute;
       top: 70px;
       right: 20px;
       padding: 12px 24px;
-      background: #ef4444;
-      color: white;
-      border: none;
-      border-radius: 8px;
+      background: transparent;
+      color: #e2a38a;
+      border: 1px solid rgba(226, 163, 138, 0.5);
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
       z-index: 10;
       display: none;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
     #exitVrBtn:hover {
-      background: #dc2626;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+      border-color: #e2a38a;
+      color: #ece8e1;
     }
     #continentModal {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(255, 255, 255, 0.98);
+      background: rgba(22, 29, 38, 0.98);
+      border: 1px solid rgba(236, 232, 225, 0.14);
       padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
       z-index: 1000;
       min-width: 400px;
       text-align: center;
@@ -245,7 +257,7 @@
       }
     }
     #continentModal h2 {
-      color: #1a1a2e;
+      color: #ece8e1;
       margin-bottom: 30px;
       font-size: 28px;
     }
@@ -257,34 +269,30 @@
     }
     .continent-btn {
       padding: 15px 20px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: white;
-      border: none;
-      border-radius: 8px;
+      background: transparent;
+      color: #ece8e1;
+      border: 1px solid rgba(236, 232, 225, 0.14);
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s;
     }
     .continent-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
-      background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+      border-color: #c8f542;
+      color: #c8f542;
     }
     #closeModalBtn {
       padding: 10px 20px;
-      background: #e5e7eb;
-      color: #1a1a2e;
-      border: none;
-      border-radius: 8px;
+      background: #c8f542;
+      color: #0b0f14;
+      border: 1px solid #c8f542;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
     #closeModalBtn:hover {
-      background: #d1d5db;
+      background: #e8ff8a;
     }
     #modalOverlay {
       position: fixed;
@@ -301,22 +309,23 @@
 <body>
   <canvas id="canvas"></canvas>
   
-  <button id="backButton">← Torna al Globo</button>
-  <button id="continentSelectorBtn" style="position: absolute; top: 20px; right: 20px; padding: 12px 24px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); z-index: 10; transition: all 0.3s;">🌍 Seleziona Continente</button>
+  <button id="backButton">Torna al Globo</button>
+  <button id="continentSelectorBtn" style="position: absolute; top: 20px; right: 20px; padding: 12px 24px; background: transparent; color: #ece8e1; border: 1px solid rgba(236, 232, 225, 0.14); font-size: 14px; font-weight: 600; cursor: pointer; z-index: 10; transition: all 0.2s;">Seleziona Continente</button>
   <button id="exitVrBtn">Esci da VR</button>
+  <a id="indexLink" href="index.html">Torna a Geografia</a>
   
   <div id="modalOverlay"></div>
   
   <div id="continentModal">
-    <h2>🌍 Scegli un Continente</h2>
+    <h2>Scegli un Continente</h2>
     <div class="continents-grid">
-      <button class="continent-btn" data-continent="Africa">🌍 Africa</button>
-      <button class="continent-btn" data-continent="Asia">🌏 Asia</button>
-      <button class="continent-btn" data-continent="Europe">🌎 Europa</button>
-      <button class="continent-btn" data-continent="North America">🗽 Nord America</button>
-      <button class="continent-btn" data-continent="South America">🦙 Sud America</button>
-      <button class="continent-btn" data-continent="Oceania">🏝️ Oceania</button>
-      <button class="continent-btn" data-continent="Antarctica">❄️ Antartide</button>
+      <button class="continent-btn" data-continent="Africa">Africa</button>
+      <button class="continent-btn" data-continent="Asia">Asia</button>
+      <button class="continent-btn" data-continent="Europe">Europa</button>
+      <button class="continent-btn" data-continent="North America">Nord America</button>
+      <button class="continent-btn" data-continent="South America">Sud America</button>
+      <button class="continent-btn" data-continent="Oceania">Oceania</button>
+      <button class="continent-btn" data-continent="Antarctica">Antartide</button>
     </div>
     <button id="closeModalBtn">Chiudi</button>
   </div>
@@ -327,7 +336,7 @@
   </div>
   
   <div id="info">
-    <h1>🌍 Mappamondo 3D</h1>
+    <h1>Mappamondo 3D</h1>
     <p>Clicca su una nazione per scoprire il suo nome.</p>
     <div id="countryName">Caricamento...</div>
   </div>
@@ -350,13 +359,14 @@
   </div>
 
   <div id="controls">
-    <h3>🎮 Controlli</h3>
+    <h3>Controlli</h3>
     <ul>
       <li><strong>Rotazione:</strong> Trascina con il mouse</li>
       <li><strong>Zoom:</strong> Rotella del mouse</li>
       <li><strong>Pan:</strong> Click destro + trascina</li>
       <li><strong>Reset:</strong> Doppio click</li>
     </ul>
+    <div class="credit">2025-26 IV A INF &middot; Modificato da LeoGalli</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/earcut@2.2.4/src/earcut.js"></script>
@@ -365,7 +375,7 @@
     // Global error handler for debugging
     window.addEventListener('error', (event) => {
       console.error('Global error:', event.error);
-      document.getElementById('countryName').textContent = '❌ Errore: ' + (event.error?.message || 'Errore sconosciuto');
+      document.getElementById('countryName').textContent = 'Errore: ' + (event.error?.message || 'Errore sconosciuto');
     });
 
     import * as THREE from '/vendor/three/build/three.module.js';
@@ -1320,7 +1330,7 @@
         if (clickedObject && clickedObject.userData?.country) {
           const country = clickedObject.userData.country;
           const normalizedCountry = resolveCountryKey(country);
-          document.getElementById('countryName').textContent = '🎯 ' + normalizedCountry;
+          document.getElementById('countryName').textContent = normalizedCountry;
           showCountryCard(country, clickedObject);
           zoomToCountry(clickedObject);
         }
@@ -1468,7 +1478,7 @@
       loadWorldMap();
     } catch (error) {
       console.error('Error loading world map:', error);
-      document.getElementById('countryName').textContent = '❌ Errore nel caricamento della mappa';
+      document.getElementById('countryName').textContent = 'Errore nel caricamento della mappa';
     }
   </script>
 </body>

@@ -1,14 +1,15 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@500;600;700&display=swap");
 
 :root {
-  --xr-bg: #0e1114;
-  --xr-panel: rgba(18, 22, 26, 0.94);
-  --xr-line: rgba(255, 255, 255, 0.14);
-  --xr-text: #e8ebe8;
-  --xr-muted: rgba(232, 235, 232, 0.58);
-  --xr-accent: #9fd0c0;
+  --xr-bg: #0b0f14;
+  --xr-panel: rgba(22, 29, 38, 0.96);
+  --xr-line: rgba(236, 232, 225, 0.14);
+  --xr-text: #ece8e1;
+  --xr-muted: #9aa3ad;
+  --xr-accent: #c8f542;
   --xr-warn: #e2a38a;
   --xr-font: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --xr-display: "Bricolage Grotesque", "IBM Plex Sans", sans-serif;
   --xr-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
@@ -46,7 +47,6 @@ body {
 }
 
 #info {
-  right: auto;
   top: 4.5rem;
   padding: 0.95rem 1rem;
   line-height: 1.5;
@@ -56,6 +56,7 @@ body {
 #info strong {
   display: block;
   margin-bottom: 0.35rem;
+  font-family: var(--xr-display);
   font-size: 1rem;
 }
 
@@ -72,24 +73,34 @@ body {
 }
 
 .ph-title {
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-family: var(--xr-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
 }
 
 .ph-sub {
+  font-size: 0.72rem;
+  color: var(--xr-muted);
+  margin-top: 0.2rem;
+}
+
+.credit {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--xr-line);
   font-size: 0.68rem;
   color: var(--xr-muted);
+  line-height: 1.4;
 }
 
 .sec-label {
   margin: 0.85rem 0 0.5rem;
   font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--xr-muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .fx-row {
@@ -140,14 +151,14 @@ body {
 
 #applyBtn {
   flex: 2;
-  background: var(--xr-text);
+  background: var(--xr-accent);
   color: var(--xr-bg);
-  border: 1px solid var(--xr-text);
+  border: 1px solid var(--xr-accent);
   padding: 0.5rem;
 }
 
 #applyBtn:hover {
-  background: #fff;
+  background: #e8ff8a;
 }
 
 #resetBtn {
@@ -159,7 +170,8 @@ body {
 }
 
 #resetBtn:hover {
-  border-color: var(--xr-text);
+  border-color: var(--xr-accent);
+  color: var(--xr-accent);
 }
 
 #fxError {
@@ -324,6 +336,8 @@ input[type="range"]::-moz-range-thumb {
   justify-content: center;
   border: 1px solid var(--xr-line);
   color: var(--xr-accent);
+  font-size: 0.65rem;
+  font-weight: 700;
 }
 
 .action-grid {
@@ -339,11 +353,35 @@ input[type="range"]::-moz-range-thumb {
   padding: 0.45rem;
   color: var(--xr-text);
   text-align: center;
+  text-decoration: none;
 }
 
-.act-btn.active {
+.act-btn.active,
+.act-btn:hover {
   border-color: var(--xr-accent);
   color: var(--xr-accent);
+}
+
+#backButton {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 12;
+  min-height: 36px;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--xr-line);
+  background: var(--xr-panel);
+  color: var(--xr-text);
+  font: 600 0.8rem var(--xr-font);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#backButton:hover,
+#backButton:focus-visible {
+  border-color: var(--xr-accent);
+  color: var(--xr-accent);
+  outline: none;
 }
 
 canvas {

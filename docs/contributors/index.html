@@ -1,261 +1,134 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contributors - Wall of Fame</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            padding: 40px 20px;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.15)),
-                url("/assets/subreddit-header-full.jpg") center/cover no-repeat;
-            background-attachment: fixed;
-            color: white;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 60px;
-        }
-
-        .header h1 {
-            font-size: 3.5em;
-            margin-bottom: 15px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .header p {
-            font-size: 1.3em;
-            opacity: 0.95;
-            font-weight: 300;
-        }
-
-        .contributors-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 40px;
-            margin-bottom: 60px;
-        }
-
-        .contributor-card {
-            backdrop-filter: blur(1px);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            text-decoration: none;
-            color: inherit;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .contributor-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
-        }
-
-        .card-header {
-            background: rgb(255 255 255 / 0%);
-            padding: 40px 20px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 5px solid white;
-            margin-bottom: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .nickname {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 8px;
-        }
-
-        .card-body {
-            padding: 30px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.65);
-        }
-
-        .motto {
-            font-size: 1.1em;
-            color: #333;
-            text-align: center;
-            line-height: 1.6;
-            font-style: italic;
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .back-to-projects {
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .back-link {
-            display: inline-block;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1em;
-            transition: opacity 0.3s ease;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .back-link:hover {
-            opacity: 0.8;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: white;
-            padding: 60px 20px;
-            font-size: 1.3em;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2.5em;
-            }
-
-            .contributors-grid {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            .avatar {
-                width: 100px;
-                height: 100px;
-            }
-
-            .nickname {
-                font-size: 1.5em;
-            }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Wall of Fame -- Metaverso a Scuola</title>
+  <meta name="theme-color" content="#0b0f14">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/menu.css">
+  <style>
+    .contrib-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .contrib-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 1.4rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease;
+    }
+    .contrib-card:hover,
+    .contrib-card:focus-visible {
+      border-color: var(--phosphor);
+      outline: none;
+    }
+    .contrib-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--line-strong);
+      background: var(--bg-2);
+    }
+    .contrib-name {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    .contrib-motto {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .contrib-cta {
+      border: 1px dashed var(--line-strong);
+    }
+    .contrib-cta:hover,
+    .contrib-cta:focus-visible {
+      border-color: var(--phosphor);
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🌟 Wall of Fame 🌟</h1>
-            <p>Meet the talented contributors who make this project extraordinary</p>
+<body class="menu-page">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand-lockup" href="../index.html" aria-label="Metaverso a Scuola">
+        <img src="/assets/metaverso-a-scuola.png" alt="">
+        <div>
+          <p class="brand-kicker">IIS G.L. Lagrange</p>
+          <p class="brand-name">Metaverso a Scuola</p>
         </div>
+      </a>
+    </header>
 
-        <div class="contributors-grid">
-            <!-- Contributor: aab016 -->
-            <a href="aab016.html" style="text-decoration: none; color: inherit;">
-                <div class="contributor-card">
-                    <div class="card-header">
-                        <img src="aab016.profile.jpg" alt="aab016 Avatar" class="avatar">
-                        <h2 class="nickname">aab016</h2>
-                    </div>
-                    <div class="card-body">
-                        <p class="motto">Dove il codice incontra le montagne, e gli algoritmi incontrano l'avventura!</p>
-                    </div>
-                </div>
-            </a>
+    <header class="page-head">
+      <a class="back-link" href="../index.html">Torna alle materie</a>
+      <h1>Wall of Fame</h1>
+      <p>I contributori che rendono questo progetto straordinario.</p>
+    </header>
 
-            <!-- Contributor: alexpvk75 -->
-            <a href="https://github.com/alexpvk75" style="text-decoration: none; color: inherit;">
-                <div class="contributor-card">
-                    <div class="card-header">
-                        <img src="https://avatars.githubusercontent.com/u/186552404?v=4" alt="Contributor Avatar" class="avatar">
-                        <h2 class="nickname">alexpvk75</h2>
-                    </div>
-                    <div class="card-body">
-                        <p class="motto">Fare o non fare, non c'è provare</p>
-                    </div>
-                </div>
-            </a>
+    <section class="panel">
+      <h2>Contributori</h2>
+      <div class="contrib-grid">
 
-            <!-- Contributor: beginner874 -->
-            <a href="https://github.com/beginner874" style="text-decoration: none; color: inherit;">
-                <div class="contributor-card">
-                    <div class="card-header">
-                        <img src="https://avatars.githubusercontent.com/u/186552241?v=4" alt="Contributor Avatar" class="avatar">
-                        <h2 class="nickname">beginner874</h2>
-                    </div>
-                </div>
-            </a>
+        <a class="contrib-card" href="aab016.html" tabindex="0" aria-label="Profilo di aab016">
+          <img class="contrib-avatar" src="aab016.profile.jpg" alt="">
+          <span class="contrib-name">aab016</span>
+          <p class="contrib-motto">Dove il codice incontra le montagne, e gli algoritmi incontrano l'avventura!</p>
+        </a>
 
-            <!-- Contributor: Dokjassi -->
-            <a href="https://github.com/Dokjassi" style="text-decoration: none; color: inherit;">
-                <div class="contributor-card">
-                    <div class="card-header">
-                        <img src="https://avatars.githubusercontent.com/u/186551987?v=4" alt="Contributor Avatar" class="avatar">
-                        <h2 class="nickname">Dokjassi</h2>
-                    </div>
-                </div>
-            </a>
+        <a class="contrib-card" href="https://github.com/alexpvk75" tabindex="0" aria-label="Profilo di alexpvk75">
+          <img class="contrib-avatar" src="https://avatars.githubusercontent.com/u/186552404?v=4" alt="">
+          <span class="contrib-name">alexpvk75</span>
+          <p class="contrib-motto">Fare o non fare, non c'e provare</p>
+        </a>
 
-            <!-- Contributor: ChristianRana239 -->
-            <a href="https://github.com/ChristianRana239" style="text-decoration: none; color: inherit;">
-                <div class="contributor-card">
-                    <div class="card-header">
-                        <img src="https://avatars.githubusercontent.com/u/202079720?v=4" alt="Contributor Avatar" class="avatar">
-                        <h2 class="nickname">ChristianRana239</h2>
-                    </div>
-                </div>
-            </a>
+        <a class="contrib-card" href="https://github.com/beginner874" tabindex="0" aria-label="Profilo di beginner874">
+          <img class="contrib-avatar" src="https://avatars.githubusercontent.com/u/186552241?v=4" alt="">
+          <span class="contrib-name">beginner874</span>
+        </a>
 
-            <!-- Contributor: CostantinoNicolò -->
-            <a href="#" style="text-decoration: none; color: inherit;">
-                <div class="contributor-card">
-                    <div class="card-header">
-                        <img src="you.profile.jpg" alt="Contributor Avatar" class="avatar">
-                        <h2 class="nickname">CostantinoNicolò</h2>
-                    </div>
-                </div>
-            </a>
+        <a class="contrib-card" href="https://github.com/Dokjassi" tabindex="0" aria-label="Profilo di Dokjassi">
+          <img class="contrib-avatar" src="https://avatars.githubusercontent.com/u/186551987?v=4" alt="">
+          <span class="contrib-name">Dokjassi</span>
+        </a>
 
-            <!-- You: Call to Action -->
-            <a href="https://github.com/aab016/studious-guide/blob/main/CONTRIBUTING.md" style="text-decoration: none; color: inherit;">
-                <div class="contributor-card">
-                    <div class="card-header">
-                        <img src="you.profile.jpg" alt="an Avatar" class="avatar">
-                        <h2 class="nickname">Tu</h2>
-                    </div>
-                    <div class="card-body">
-                        <p class="motto">Unisciti a noi e trasforma le tue idee di insegnamento in esperienze nel metaverso!!</p>
-                    </div>
-                </div>
-            </a>
-        </div>
+        <a class="contrib-card" href="https://github.com/ChristianRana239" tabindex="0" aria-label="Profilo di ChristianRana239">
+          <img class="contrib-avatar" src="https://avatars.githubusercontent.com/u/202079720?v=4" alt="">
+          <span class="contrib-name">ChristianRana239</span>
+        </a>
 
-        <div class="back-to-projects">
-            <a href="../index.html" class="back-link">← Back to Home</a>
-        </div>
-    </div>
+        <a class="contrib-card" href="#" tabindex="0" aria-label="Profilo di CostantinoNicolo">
+          <img class="contrib-avatar" src="you.profile.jpg" alt="">
+          <span class="contrib-name">CostantinoNicolo</span>
+        </a>
+
+        <a class="contrib-card contrib-cta" href="https://github.com/aab016/studious-guide/blob/main/CONTRIBUTING.md" tabindex="0" aria-label="Diventa contributore">
+          <img class="contrib-avatar" src="you.profile.jpg" alt="">
+          <span class="contrib-name">Tu</span>
+          <p class="contrib-motto">Unisciti a noi e trasforma le tue idee in esperienze nel metaverso.</p>
+        </a>
+
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p>Fork e UI: LeoGalli &middot; progetto originale aab016 / IIS Lagrange</p>
+    </footer>
+  </div>
 </body>
 </html>
