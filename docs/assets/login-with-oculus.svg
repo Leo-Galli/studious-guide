@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-label="Login with Oculus">
+  <rect width="220" height="48" rx="4" fill="#ece8e1"/>
+  <g fill="#111827">
+    <path d="M28 14c-7.7 0-14 4.5-14 10s6.3 10 14 10 14-4.5 14-10-6.3-10-14-10zm0 4.2c4.8 0 8.7 2.6 8.7 5.8S32.8 29.8 28 29.8 19.3 27.2 19.3 24 23.2 18.2 28 18.2z"/>
+    <text x="52" y="31" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="600" letter-spacing="0.04em">oculus</text>
+  </g>
+</svg>

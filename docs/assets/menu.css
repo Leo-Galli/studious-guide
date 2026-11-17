@@ -3,9 +3,9 @@
   --bg-2: #121820;
   --surface: #161d26;
   --ink: #ece8e1;
-  --muted: #9aa3ad;
-  --line: rgba(236, 232, 225, 0.12);
-  --line-strong: rgba(236, 232, 225, 0.28);
+  --muted: #b4bcc6;
+  --line: rgba(236, 232, 225, 0.14);
+  --line-strong: rgba(236, 232, 225, 0.32);
   --accent: #c8f542;
   --accent-rgb: 200, 245, 66;
   --accent-ink: #0b0f14;
@@ -142,11 +142,28 @@ body.menu-page {
 
 .login-btn {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.login-btn:hover,
+.login-btn:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid rgba(var(--accent-rgb), 0.45);
+  outline-offset: 2px;
 }
 
 .login-btn img {
-  height: 32px;
+  height: 36px;
+  width: auto;
   object-fit: contain;
+  display: block;
 }
 
 .user-info {
@@ -164,7 +181,9 @@ body.menu-page {
   display: grid;
   gap: 1rem;
   margin-bottom: 2.4rem;
-  max-width: 38rem;
+  max-width: 40rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--line);
 }
 
 .hero h1 {
@@ -249,20 +268,25 @@ body.menu-page {
   grid-template-columns: 2.2rem 1fr auto;
   gap: 0.85rem;
   align-items: baseline;
-  padding: 1.05rem 0.2rem;
+  padding: 1.05rem 0.55rem;
   text-decoration: none;
   color: inherit;
   border-bottom: 1px solid var(--line);
-  border-left: 3px solid transparent;
+  border-left: 3px solid rgba(var(--accent-rgb), 0.55);
   transition: background 0.15s ease, padding-left 0.15s ease, border-color 0.15s ease;
 }
 
 .topic:hover,
 .topic:focus-visible {
-  background: rgba(var(--accent-rgb), 0.08);
-  padding-left: 0.55rem;
+  background: rgba(var(--accent-rgb), 0.1);
+  padding-left: 0.85rem;
   border-left-color: var(--accent);
   outline: none;
+}
+
+.topic:hover .topic-label,
+.topic:focus-visible .topic-label {
+  color: var(--accent);
 }
 
 .topic-num {
@@ -283,10 +307,10 @@ body.menu-page {
 
 .topic-meta {
   font-size: 0.7rem;
-  color: var(--muted);
+  color: rgba(var(--accent-rgb), 0.85);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .topic-mark {
