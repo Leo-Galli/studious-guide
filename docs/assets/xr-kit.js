@@ -286,9 +286,8 @@ export const makeAxes = (THREE, {
   return group
 }
 
-export const creditLine = (original = '') => {
-  return String(original).trim()
-}
+/** @deprecated kept for older imports; never appends modifiers */
+export const creditLine = (original = '') => String(original || '').trim()
 
 /**
  * Build a smooth plot curve as a TubeGeometry around a CatmullRomCurve3.

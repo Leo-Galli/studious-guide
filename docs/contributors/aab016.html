@@ -1,249 +1,82 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>aab016 -> Insegnante Tecnico Pratico per i Laboratori di scienze e tecnologie informatiche</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 800px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px 20px;
-            text-align: center;
-            color: white;
-        }
-
-        .profile-pic {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 5px solid white;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .name {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .title {
-            font-size: 1.3em;
-            opacity: 0.95;
-            font-weight: 300;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .bio {
-            font-size: 1.1em;
-            color: #333;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            text-align: center;
-            font-style: italic;
-        }
-
-        .achievements-section {
-            margin-top: 30px;
-        }
-
-        .achievements-title {
-            font-size: 1.8em;
-            color: #667eea;
-            margin-bottom: 25px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .achievement {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 25px;
-            border-radius: 12px;
-            border-left: 5px solid #667eea;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .achievement:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-        }
-
-        .achievement::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 50px;
-            height: 50px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 50%;
-            transform: translate(25%, -25%);
-        }
-
-        .achievement-icon {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        .achievement-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .achievement-description {
-            color: #666;
-            font-size: 0.95em;
-            line-height: 1.5;
-        }
-
-        .footer {
-            background: #f5f7fa;
-            padding: 30px;
-            text-align: center;
-            color: #666;
-            font-size: 0.95em;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-
-        .back-link:hover {
-            color: #764ba2;
-        }
-
-        @media (max-width: 600px) {
-            .name {
-                font-size: 2em;
-            }
-
-            .achievements-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .profile-pic {
-                width: 120px;
-                height: 120px;
-            }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>aab016 -- Metaverso a Scuola</title>
+  <meta name="theme-color" content="#0b0f14">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/menu.css?v=3">
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <img src="aab016.profile.jpg" alt="aab016 Profile Picture" class="profile-pic">
-            <h1 class="name">aab016</h1>
-            <p class="title">Insegnante Tecnico Pratico per i Laboratori di scienze e tecnologie informatiche</p>
+<body class="menu-page subject-contributors">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand-lockup" href="../index.html" aria-label="Metaverso a Scuola">
+        <img src="/assets/metaverso-a-scuola.png" alt="">
+        <div>
+          <p class="brand-kicker">IIS G.L. Lagrange</p>
+          <p class="brand-name">Metaverso a Scuola</p>
         </div>
+      </a>
+    </header>
 
-        <div class="content">
-            <p class="bio">
-                "Dove il codice incontra le montagne, e gli algoritmi incontrano l'avventura!"
-            </p>
+    <header class="page-head">
+      <a class="back-link" href="index.html">Torna al Wall of Fame</a>
+      <h1>aab016</h1>
+      <p>Insegnante Tecnico Pratico per i Laboratori di scienze e tecnologie informatiche.</p>
+    </header>
 
-            <div class="achievements-section">
-                <h2 class="achievements-title">🏆 AFK</h2>
-
-                <div class="achievements-grid">
-                    <div class="achievement">
-                        <div class="achievement-icon">🚴</div>
-                        <div class="achievement-title">Milano-Genova in bicicletta</div>
-                        <div class="achievement-description">
-                            Completato il leggendario viaggio di 180km da Milano a Genova interamente in bicicletta in 10h: provando che la resistenza non è solo per le CPU!
-                        </div>
-                    </div>
-
-                    <div class="achievement">
-                        <div class="achievement-icon">⛷️</div>
-                        <div class="achievement-title">Cervinia-Breithorn no-lift</div>
-                        <div class="achievement-description">
-                            Conquered the Breithorn skialp ascent and descent in 8h without using any ski lifts from Cervinia: pure human power over 2100m of ascent!
-                        </div>
-                    </div>
-
-                    <div class="achievement">
-                        <div class="achievement-icon">🚵</div>
-                        <div class="achievement-title">"Via degli Dei" by MTB</div>
-                        <div class="achievement-description">
-                            Tackled the infamous "Via degli Dei" hike track from Bologna to Firenze in 14h: legendary 127km trail with 3250m of ascent done in legend time!
-                        </div>
-                    </div>
-
-                    <div class="achievement">
-                        <div class="achievement-icon">📚</div>
-                        <div class="achievement-title">Book Author</div>
-                        <div class="achievement-description">
-                            Authored 3 comprehensive books about Bitcoin: sharing knowledge about blockchain technology with the world.
-                        </div>
-                    </div>
-
-                    <div class="achievement">
-                        <div class="achievement-icon">🛼</div>
-                        <div class="achievement-title">All you can roller</div>
-                        <div class="achievement-description">
-                            Raggiunto un record personale di 52km su pattini in linea: combinando grazia e velocità su ruote!
-                        </div>
-                    </div>
-
-                    <div class="achievement">
-                        <div class="achievement-icon">🏔️</div>
-                        <div class="achievement-title">Alpine Summits of my Life</div>
-                        <div class="achievement-description">
-                            Reached 4000m+ Alpine peaks 6 times: an incredible mountaineering accomplishment that speaks to determination and passion.
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <section class="panel">
+      <div class="contrib-grid" style="grid-template-columns: 1fr; justify-items: start;">
+        <div class="contrib-card" style="align-items: flex-start; width: 100%; max-width: 42rem;">
+          <img class="contrib-avatar" src="aab016.profile.jpg" alt="" width="72" height="72">
+          <span class="contrib-name">aab016</span>
+          <p class="contrib-motto" style="text-align: left;">Dove il codice incontra le montagne, e gli algoritmi incontrano l'avventura!</p>
         </div>
+      </div>
+    </section>
 
-        <div class="footer">
-            <p><strong>Teaching Philosophy:</strong> "Breaking barriers one (lab) session at a time, in the classroom and on the trails."</p>
-            <a href="index.html" class="back-link">← Back to Contributors</a>
+    <section class="panel" aria-labelledby="afk-title">
+      <h2 id="afk-title">AFK</h2>
+      <div class="experience-list">
+        <div class="experience">
+          <span class="experience-tag">Ciclismo</span>
+          <span class="experience-title">Milano-Genova in bicicletta</span>
+          <p class="experience-desc">180 km da Milano a Genova in 10h: resistenza non solo per le CPU.</p>
         </div>
-    </div>
+        <div class="experience">
+          <span class="experience-tag">Sci alpinismo</span>
+          <span class="experience-title">Cervinia-Breithorn no-lift</span>
+          <p class="experience-desc">Salita e discesa del Breithorn in 8h senza impianti, oltre 2100 m di dislivello.</p>
+        </div>
+        <div class="experience">
+          <span class="experience-tag">MTB</span>
+          <span class="experience-title">Via degli Dei by MTB</span>
+          <p class="experience-desc">Bologna-Firenze, 127 km e 3250 m di ascesa in 14h.</p>
+        </div>
+        <div class="experience">
+          <span class="experience-tag">Libri</span>
+          <span class="experience-title">Book Author</span>
+          <p class="experience-desc">Autore di 3 libri su Bitcoin e tecnologia blockchain.</p>
+        </div>
+        <div class="experience">
+          <span class="experience-tag">Pattinaggio</span>
+          <span class="experience-title">All you can roller</span>
+          <p class="experience-desc">Record personale di 52 km su pattini in linea.</p>
+        </div>
+        <div class="experience">
+          <span class="experience-tag">Alpinismo</span>
+          <span class="experience-title">Alpine Summits of my Life</span>
+          <p class="experience-desc">Sei vette alpine oltre i 4000 m.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p>Teaching philosophy: Breaking barriers one (lab) session at a time, in the classroom and on the trails.</p>
+    </footer>
+  </div>
 </body>
 </html>

@@ -69,13 +69,18 @@ body.menu-page {
   line-height: 1.5;
 }
 
-a {
+.lead a,
+.foot a:not(.cta),
+.page-head a.back-link {
   color: var(--accent);
 }
 
-a:hover,
-a:focus-visible {
-  filter: brightness(1.15);
+.lead a:hover,
+.lead a:focus-visible,
+.foot a:not(.cta):hover,
+.foot a:not(.cta):focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .shell {
@@ -481,6 +486,7 @@ a.experience:focus-visible {
   font-weight: 700;
   font-size: 1.05rem;
   letter-spacing: -0.02em;
+  color: var(--ink);
 }
 
 .contrib-motto {

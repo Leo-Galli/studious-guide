@@ -3,14 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sfera XR — Metaverso a Scuola</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css" />
+    <title>Sfera XR -- Metaverso a Scuola</title>
+    <link rel="stylesheet" href="/assets/xr-hud.css?v=3" />
   </head>
   <body>
-    <a id="backButton" href="index.html">Torna a Matematica</a>
-
     <div id="panel">
       <div class="panel-inner">
+        <a class="xr-back" href="index.html">Torna a Matematica</a>
         <div class="ph">
           <div>
             <div class="ph-title">Sfera XR</div>
@@ -41,9 +40,9 @@
         </div>
 
         <div class="sec-label">Aspetto</div>
-        <label class="fx-row" style="gap: 0.5rem; cursor: pointer;">
+        <label class="wire-row" for="wireToggle">
           <input type="checkbox" id="wireToggle" checked />
-          <span class="fx-lbl" style="color: var(--xr-text);">Wireframe</span>
+          Wireframe
         </label>
 
         <div class="formula" id="formulaBox">r = 1.0 · centro (0.0, 0.0, 0.0)</div>
@@ -55,16 +54,16 @@
           Grilletto: punta gli assi o la sfera e trascina per ruotare/spostare il gruppo.
         </div>
 
-        <div class="credit" id="creditBox"></div>
+        <div class="credit" id="creditBox">2025-26 IV C INF</div>
       </div>
     </div>
 
     <script type="module">
-      import { createXrShell, makeAxes, creditLine } from '/assets/xr-kit.js'
+      import { createXrShell, makeAxes } from '/assets/xr-kit.js?v=3'
 
       const { THREE, scene, startLoop, hideHudInVr, attachDrag } = createXrShell()
 
-      const axes = makeAxes(THREE, { length: 2.4, thickness: 0.025, colors: [0x9fd0c0, 0x9fd0c0, 0x9fd0c0] })
+      const axes = makeAxes(THREE, { length: 2.4, thickness: 0.025 })
       axes.position.set(0, 1.25, -1.2)
       scene.add(axes)
 
@@ -95,7 +94,6 @@
       const centerZValue = document.getElementById('centerZValue')
       const formulaBox = document.getElementById('formulaBox')
       const wireToggle = document.getElementById('wireToggle')
-      document.getElementById('creditBox').textContent = creditLine('2025-26 IV C INF')
 
       const updateSphere = () => {
         sphere.scale.setScalar(radius)
@@ -122,14 +120,9 @@
       wireToggle.addEventListener('change', () => { wire.visible = wireToggle.checked })
 
       const drag = attachDrag([axes])
-
-      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton')])
-
+      hideHudInVr(document.getElementById('panel'))
       updateSphere()
-
-      startLoop(() => {
-        drag.updateDrag()
-      })
+      startLoop(() => { drag.updateDrag() })
     </script>
   </body>
 </html>

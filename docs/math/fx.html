@@ -4,13 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>f(x) XR</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css" />
+    <link rel="stylesheet" href="/assets/xr-hud.css?v=3" />
   </head>
   <body>
-    <a id="backButton" href="index.html">Torna a Matematica</a>
-
-    <div id="panel">
+<div id="panel">
       <div class="panel-inner">
+        <a class="xr-back" href="index.html">Torna a Matematica</a>
         <div class="ph">
           <div>
             <div class="ph-title">f(x) Explorer XR</div>
@@ -53,7 +52,7 @@
     </div>
 
     <script type="module">
-      import { createXrShell, makeAxes, makeTube, creditLine } from '/assets/xr-kit.js'
+      import { createXrShell, makeAxes, makeTube } from '/assets/xr-kit.js?v=3'
 
       const { THREE, scene, resetView, startLoop, hideHudInVr, attachDrag } = createXrShell()
 
@@ -101,7 +100,7 @@
       const bSlider = document.getElementById('bSlider')
       const aValue = document.getElementById('aValue')
       const bValue = document.getElementById('bValue')
-      document.getElementById('creditBox').textContent = creditLine('f(x) Explorer · Leonardo Galli')
+      document.getElementById('creditBox').textContent = 'f(x) Explorer · Leonardo Galli'
 
       // Safe-ish compiler: only whitelisted math tokens survive, everything is
       // evaluated against explicit x, A, B arguments (no access to outer scope).
@@ -205,7 +204,7 @@
         return hits.length ? hits[0].point.x : null
       }
 
-      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton')])
+      hideHudInVr(document.getElementById('panel'))
 
       refresh()
 

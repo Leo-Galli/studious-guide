@@ -4,13 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Multiplayer VR Room — Metaverso a Scuola</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css" />
+    <link rel="stylesheet" href="/assets/xr-hud.css?v=3" />
   </head>
   <body>
-    <a id="backButton" href="index.html">Torna alle demo</a>
-
-    <div id="panel">
+<div id="panel">
       <div class="panel-inner">
+        <a class="xr-back" href="index.html">Torna alle demo</a>
         <div class="ph">
           <div>
             <div class="ph-title">Multiplayer VR Room</div>
@@ -86,12 +85,12 @@
     </script>
 
     <script type="module">
-      import { createXrShell, creditLine } from '/assets/xr-kit.js'
+      import { createXrShell } from '/assets/xr-kit.js?v=3'
       import { GLTFLoader } from '/vendor/three/examples/jsm/loaders/GLTFLoader.js'
 
       const { THREE, scene, controllers, startLoop, hideHudInVr } = createXrShell({ withFloor: true })
 
-      document.getElementById('creditBox').textContent = creditLine('WebXR Multiplayer Room')
+      document.getElementById('creditBox').textContent = 'WebXR Multiplayer Room'
 
       const onDXControllerSelect = () => {
         window.emitInvoker('onDXControllerSelect', window.randomColor)
@@ -181,7 +180,7 @@
       const gltf = await loader.loadAsync('sketchfab-models/2024-ducati-streetfighter-v4-s-c501252f8af64c559bf91dc306c3a550/scene.gltf')
       scene.add(gltf.scene)
 
-      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton')])
+      hideHudInVr(document.getElementById('panel'))
 
       const clock = new THREE.Clock()
       startLoop(() => {

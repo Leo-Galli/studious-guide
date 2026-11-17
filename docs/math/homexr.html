@@ -4,13 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HomeXR</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css" />
+    <link rel="stylesheet" href="/assets/xr-hud.css?v=3" />
   </head>
   <body>
-    <a id="backButton" href="index.html">Torna a Matematica</a>
-
-    <div id="panel">
+<div id="panel">
       <div class="panel-inner">
+        <a class="xr-back" href="index.html">Torna a Matematica</a>
         <div class="ph">
           <div>
             <div class="ph-title">HomeXR</div>
@@ -41,11 +40,11 @@
     </div>
 
     <script type="module">
-      import { createXrShell, creditLine } from '/assets/xr-kit.js'
+      import { createXrShell } from '/assets/xr-kit.js?v=3'
 
       const { THREE, scene, camera, renderer, startLoop, hideHudInVr, attachDrag } = createXrShell()
 
-      document.getElementById('creditBox').textContent = creditLine('Laboratorio studious-guide · aab016')
+      document.getElementById('creditBox').textContent = 'Laboratorio studious-guide · aab016'
 
       const portals = [
         { label: 'sin', href: 'sin.html' },
@@ -129,7 +128,7 @@
         if (hit) enter(findPortal(hit.object))
       })
 
-      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton')])
+      hideHudInVr(document.getElementById('panel'))
 
       startLoop(() => {
         drag.updateDrag()

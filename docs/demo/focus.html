@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Focus Lens — Metaverso a Scuola</title>
-    <link rel="stylesheet" href="/assets/xr-hud.css" />
+    <link rel="stylesheet" href="/assets/xr-hud.css?v=3" />
     <style>
       /* Page-specific additions layered on top of the shared HUD kit */
       #distances {
@@ -55,10 +55,9 @@
     </style>
   </head>
   <body>
-    <a id="backButton" href="index.html">Torna alle demo</a>
-
-    <div id="panel">
+<div id="panel">
       <div class="panel-inner">
+        <a class="xr-back" href="index.html">Torna alle demo</a>
         <div class="ph">
           <div>
             <div class="ph-title">Focus Lens</div>
@@ -104,7 +103,7 @@
     </script>
 
     <script type="module">
-      import { createXrShell, creditLine } from '/assets/xr-kit.js'
+      import { createXrShell } from '/assets/xr-kit.js?v=3'
       import { Root, Container, Text, reversePainterSortStable } from '@pmndrs/uikit'
 
       const { THREE, scene, camera, cameraRig, renderer, startLoop, hideHudInVr, resetView } = createXrShell({
@@ -117,7 +116,7 @@
       renderer.setTransparentSort(reversePainterSortStable)
       scene.fog = new THREE.FogExp2(0x03070f, 0.022)
 
-      document.getElementById('creditBox').textContent = creditLine('Focus Lens · Meta IWSDK UIKitML')
+      document.getElementById('creditBox').textContent = 'Focus Lens · Meta IWSDK UIKitML'
 
       // ── Custom floor / grid (kept dark for the optometry aesthetic) ──
       const floor = new THREE.Mesh(
@@ -276,7 +275,7 @@
         cameraRig.position.set(0, 0, -d + 0.4)
       }
 
-      hideHudInVr([document.getElementById('panel'), document.getElementById('backButton'), document.getElementById('distances')])
+      hideHudInVr([document.getElementById('panel'), document.getElementById('distances')])
 
       const clock = new THREE.Clock()
       startLoop(() => {
