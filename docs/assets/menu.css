@@ -274,45 +274,31 @@ body.menu-page {
 }
 
 .topic {
-  --swatch: var(--accent);
-  --swatch-rgb: var(--accent-rgb);
   display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
-  column-gap: 0.85rem;
-  row-gap: 0.2rem;
-  align-items: center;
+  gap: 0.25rem;
   padding: 1rem 1.05rem;
   text-decoration: none;
   color: inherit;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--line);
+  border: 1px solid rgba(var(--swatch-rgb), 0.35);
+  border-top: 2px solid var(--swatch);
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
 .topic:hover,
 .topic:focus-visible {
-  border-color: rgba(var(--swatch-rgb), 0.7);
-  background: rgba(var(--swatch-rgb), 0.07);
+  border-color: var(--swatch);
+  background: rgba(var(--swatch-rgb), 0.1);
   outline: none;
   transform: translateY(-1px);
 }
 
-.topic-swatch {
-  grid-row: 1 / span 2;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--swatch);
-  box-shadow: 0 0 0 3px rgba(var(--swatch-rgb), 0.18);
-}
-
+.topic-swatch,
 .topic-num {
   display: none;
 }
 
 .topic-label {
-  grid-column: 2;
   font-family: var(--display);
   font-size: 1.15rem;
   font-weight: 700;
@@ -321,13 +307,17 @@ body.menu-page {
   color: var(--ink);
 }
 
+.topic:hover .topic-label,
+.topic:focus-visible .topic-label {
+  color: var(--swatch);
+}
+
 .topic-meta {
-  grid-column: 2;
   font-size: 0.68rem;
-  color: var(--muted);
+  color: var(--swatch);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .topic-mark {
