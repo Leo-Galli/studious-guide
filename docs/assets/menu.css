@@ -275,22 +275,21 @@ body.menu-page {
 
 .topic {
   display: grid;
-  gap: 0.25rem;
-  padding: 1rem 1.05rem;
+  gap: 0.3rem;
+  padding: 1.05rem 1.1rem;
   text-decoration: none;
   color: inherit;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(var(--swatch-rgb), 0.35);
-  border-top: 2px solid var(--swatch);
-  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--line);
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .topic:hover,
 .topic:focus-visible {
-  border-color: var(--swatch);
-  background: rgba(var(--swatch-rgb), 0.1);
+  border-color: rgba(var(--swatch-rgb), 0.55);
+  background: rgba(var(--swatch-rgb), 0.08);
+  box-shadow: inset 3px 0 0 var(--swatch);
   outline: none;
-  transform: translateY(-1px);
 }
 
 .topic-swatch,
