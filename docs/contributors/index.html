@@ -9,61 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/menu.css">
-  <style>
-    .contrib-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .contrib-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 1.4rem 1rem;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      text-decoration: none;
-      color: inherit;
-      transition: border-color 0.15s ease;
-    }
-    .contrib-card:hover,
-    .contrib-card:focus-visible {
-      border-color: var(--phosphor);
-      outline: none;
-    }
-    .contrib-avatar {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--line-strong);
-      background: var(--bg-2);
-    }
-    .contrib-name {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 1.05rem;
-      letter-spacing: -0.02em;
-    }
-    .contrib-motto {
-      margin: 0;
-      font-size: 0.88rem;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.5;
-    }
-    .contrib-cta {
-      border: 1px dashed var(--line-strong);
-    }
-    .contrib-cta:hover,
-    .contrib-cta:focus-visible {
-      border-color: var(--phosphor);
-    }
-  </style>
 </head>
-<body class="menu-page">
+<body class="menu-page subject-contributors">
   <div class="shell">
     <header class="topbar">
       <a class="brand-lockup" href="../index.html" aria-label="Metaverso a Scuola">
@@ -89,6 +36,12 @@
           <img class="contrib-avatar" src="aab016.profile.jpg" alt="">
           <span class="contrib-name">aab016</span>
           <p class="contrib-motto">Dove il codice incontra le montagne, e gli algoritmi incontrano l'avventura!</p>
+        </a>
+
+        <a class="contrib-card" href="https://github.com/Leo-Galli" tabindex="0" aria-label="Profilo di Leo-Galli">
+          <img class="contrib-avatar" src="https://avatars.githubusercontent.com/u/190075657?v=4" alt="">
+          <span class="contrib-name">Leo-Galli</span>
+          <p class="contrib-motto">UI, WebXR kit e cataloghi per Metaverso a Scuola.</p>
         </a>
 
         <a class="contrib-card" href="https://github.com/alexpvk75" tabindex="0" aria-label="Profilo di alexpvk75">
@@ -125,9 +78,6 @@
 
       </div>
     </section>
-
-    <footer class="foot">
-      </footer>
   </div>
 </body>
 </html>

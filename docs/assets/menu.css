@@ -6,11 +6,37 @@
   --muted: #9aa3ad;
   --line: rgba(236, 232, 225, 0.12);
   --line-strong: rgba(236, 232, 225, 0.28);
-  --phosphor: #c8f542;
-  --phosphor-ink: #0b0f14;
+  --accent: #c8f542;
+  --accent-rgb: 200, 245, 66;
+  --accent-ink: #0b0f14;
   --font: "IBM Plex Sans", "Segoe UI", sans-serif;
   --display: "Bricolage Grotesque", "IBM Plex Sans", sans-serif;
 }
+
+.subject-art,
+.topic-art { --accent: #e8896b; --accent-rgb: 232, 137, 107; }
+.subject-biology,
+.topic-biology { --accent: #6fd3a0; --accent-rgb: 111, 211, 160; }
+.subject-chemistry,
+.topic-chemistry { --accent: #f0b45a; --accent-rgb: 240, 180, 90; }
+.subject-citizenship,
+.topic-citizenship { --accent: #7eb6e8; --accent-rgb: 126, 182, 232; }
+.subject-physics,
+.topic-physics { --accent: #5cc8e8; --accent-rgb: 92, 200, 232; }
+.subject-geography,
+.topic-geography { --accent: #3dbaa4; --accent-rgb: 61, 186, 164; }
+.subject-english,
+.topic-english { --accent: #e2c36a; --accent-rgb: 226, 195, 106; }
+.subject-literature,
+.topic-literature { --accent: #e08e8a; --accent-rgb: 224, 142, 138; }
+.subject-math,
+.topic-math { --accent: #c8f542; --accent-rgb: 200, 245, 66; }
+.subject-history,
+.topic-history { --accent: #d4a574; --accent-rgb: 212, 165, 116; }
+.subject-demo,
+.topic-demo { --accent: #9ab0c4; --accent-rgb: 154, 176, 196; }
+.subject-contributors,
+.topic-contributors { --accent: #b5d47a; --accent-rgb: 181, 212, 122; }
 
 *,
 *::before,
@@ -32,24 +58,24 @@ body.menu-page {
     repeating-linear-gradient(
       0deg,
       transparent 0 27px,
-      rgba(200, 245, 66, 0.035) 27px 28px
+      rgba(var(--accent-rgb), 0.035) 27px 28px
     ),
     repeating-linear-gradient(
       90deg,
       transparent 0 27px,
-      rgba(200, 245, 66, 0.035) 27px 28px
+      rgba(var(--accent-rgb), 0.035) 27px 28px
     ),
     var(--bg);
   line-height: 1.5;
 }
 
 a {
-  color: var(--phosphor);
+  color: var(--accent);
 }
 
 a:hover,
 a:focus-visible {
-  color: #e8ff8a;
+  filter: brightness(1.15);
 }
 
 .shell {
@@ -169,9 +195,9 @@ a:focus-visible {
   justify-content: center;
   min-height: 44px;
   padding: 0.65rem 1.05rem;
-  border: 1px solid var(--phosphor);
-  background: var(--phosphor);
-  color: var(--phosphor-ink);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
   text-decoration: none;
   font-weight: 700;
   font-size: 0.92rem;
@@ -180,20 +206,21 @@ a:focus-visible {
 
 .cta:hover,
 .cta:focus-visible {
-  background: #e8ff8a;
-  color: var(--phosphor-ink);
+  filter: brightness(1.08);
+  color: var(--accent-ink);
 }
 
 .cta.ghost {
   background: transparent;
   color: var(--ink);
   border-color: var(--line-strong);
+  filter: none;
 }
 
 .cta.ghost:hover,
 .cta.ghost:focus-visible {
-  border-color: var(--phosphor);
-  color: var(--phosphor);
+  border-color: var(--accent);
+  color: var(--accent);
   background: transparent;
 }
 
@@ -221,20 +248,22 @@ a:focus-visible {
   text-decoration: none;
   color: inherit;
   border-bottom: 1px solid var(--line);
-  transition: background 0.15s ease, padding-left 0.15s ease;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease, padding-left 0.15s ease, border-color 0.15s ease;
 }
 
 .topic:hover,
 .topic:focus-visible {
-  background: rgba(200, 245, 66, 0.06);
+  background: rgba(var(--accent-rgb), 0.08);
   padding-left: 0.55rem;
+  border-left-color: var(--accent);
   outline: none;
 }
 
 .topic-num {
   font-family: var(--display);
   font-size: 0.85rem;
-  color: var(--phosphor);
+  color: var(--accent);
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -263,6 +292,8 @@ a:focus-visible {
   display: grid;
   gap: 0.7rem;
   margin-bottom: 1.6rem;
+  padding-left: 0.85rem;
+  border-left: 3px solid var(--accent);
 }
 
 .back-link {
@@ -276,7 +307,7 @@ a:focus-visible {
 
 .back-link:hover,
 .back-link:focus-visible {
-  color: var(--phosphor);
+  color: var(--accent);
 }
 
 .page-head h1 {
@@ -297,6 +328,7 @@ a:focus-visible {
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
+  border-top: 2px solid rgba(var(--accent-rgb), 0.55);
   padding: 1.15rem 1.2rem;
 }
 
@@ -350,7 +382,7 @@ a:focus-visible {
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--phosphor);
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -376,11 +408,11 @@ a:focus-visible {
 
 a.experience:hover .experience-title,
 a.experience:focus-visible .experience-title {
-  color: var(--phosphor);
+  color: var(--accent);
 }
 
 a.experience:focus-visible {
-  outline: 2px solid var(--phosphor);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -406,6 +438,61 @@ a.experience:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
+}
+
+.contrib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.contrib-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.4rem 1rem;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.contrib-card:hover,
+.contrib-card:focus-visible {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.06);
+  outline: none;
+}
+
+.contrib-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.contrib-name {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.contrib-motto {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.contrib-cta {
+  border-style: dashed;
 }
 
 @media (max-width: 720px) {
@@ -442,7 +529,8 @@ a.experience:focus-visible {
     scroll-behavior: auto;
   }
 
-  .topic {
+  .topic,
+  .contrib-card {
     transition: none;
   }
 }
